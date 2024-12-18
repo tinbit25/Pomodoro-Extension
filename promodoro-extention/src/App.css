@@ -1,42 +1,74 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* src/App.css */
+
+/* General Reset */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Sidebar */
+.fixed {
+  transition: 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #1f2937;
+  color: white;
+  z-index: 50;
+  padding-top: 64px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Sidebar Items */
+.fixed nav div {
+  padding: 16px;
+  cursor: pointer;
 }
 
-.card {
-  padding: 2em;
+.fixed nav div:hover {
+  background-color: #374151;
 }
 
-.read-the-docs {
-  color: #888;
+/* Main Content */
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+.ml-64 {
+  transform-origin: left top;
+}
+
+/* Header */
+header {
+  background-color: #1f2937;
+  color: white;
+  padding: 16px;
+}
+
+/* Buttons */
+button {
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+  padding: 10px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Timer Circle */
+.w-64 {
+  width: 256px;
+  height: 256px;
+}
+
+.bg-blue-200 {
+  background-color: #bfdeff;
+}
+
+.text-6xl {
+  font-size: 4rem;
+  font-weight: bold;
 }
