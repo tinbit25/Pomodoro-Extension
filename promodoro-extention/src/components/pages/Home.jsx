@@ -3,6 +3,7 @@ import TabButton from "../TabButton";
 import TimeCircle from "../TimeCircle";
 import ControlButtons from "../ControlButtons";
 import { FaCog } from "react-icons/fa";
+
 const Home = ({ isDarkMode, handleSessionComplete }) => {
   const [tabsData, setTabsData] = useState([
     { label: "Pomodoro", value: "pomodoro", duration: "25:00" },
@@ -13,8 +14,14 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
   const [activeTab, setActiveTab] = useState(tabsData[0]?.value);
   const [isRunning, setIsRunning] = useState(false);
   const [resetSignal, setResetSignal] = useState(false);
+  const [sessionProgress, setSessionProgress] = useState({
+    pomodoro: 0,
+    shortBreak: 0,
+    longBreak: 0,
+  });
 
   const handleStartPause = () => setIsRunning((prev) => !prev);
+
   const handleRestart = () => {
     setIsRunning(false);
     setResetSignal((prev) => !prev);
@@ -22,10 +29,36 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
 
   const handleComplete = () => {
     const completionTime = new Date().toLocaleString();
+    let isSuccess = false;
+
+    setSessionProgress((prev) => {
+      const updatedProgress = { ...prev };
+
+      if (activeTab === "pomodoro") updatedProgress.pomodoro += 1;
+      if (activeTab === "short-break") updatedProgress.shortBreak += 1;
+      if (activeTab === "long-break") updatedProgress.longBreak += 1;
+
+      if (
+        updatedProgress.pomodoro >= 1 &&
+        updatedProgress.shortBreak >= 1 &&
+        updatedProgress.longBreak >= 4
+      ) {
+        isSuccess = true;
+      }
+
+      return updatedProgress;
+    });
+
     handleSessionComplete({
       tab: activeTab,
       completionTime,
+      status: isSuccess ? "Done Successfully" : "Fail Successfully",
     });
+
+    if (isSuccess) {
+      setSessionProgress({ pomodoro: 0, shortBreak: 0, longBreak: 0 });
+    }
+
     setIsRunning(false);
     setResetSignal((prev) => !prev);
   };
@@ -43,7 +76,11 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
           isDarkMode ? "bg-gray-900" : "bg-white"
         }`}
       >
-        {/* Render Tab Buttons */}
+        <div className="flex justify-end">
+          <button className="text-2xl p-2">
+            <FaCog />
+          </button>
+        </div>
         <div className="flex space-x-6 mb-8 justify-center">
           {tabsData.map((tab) => (
             <TabButton
@@ -54,8 +91,6 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
             />
           ))}
         </div>
-
-        {/* Render Timer */}
         {currentTab && (
           <TimeCircle
             duration={currentTab.duration}
@@ -63,21 +98,23 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
             resetSignal={resetSignal}
           />
         )}
-
-        {/* Control Buttons */}
         <div className="mt-8">
           <ControlButtons
             isRunning={isRunning}
             handleStartPause={handleStartPause}
             handleRestart={handleRestart}
-            handleComplete={handleComplete}
             isDarkMode={isDarkMode}
           />
+          <button
+            onClick={handleComplete}
+            className="mt-4 px-8 py-2 rounded-full bg-blue-500 text-white font-bold"
+          >
+            Complete
+          </button>
         </div>
       </div>
     </div>
   );
 };
-
 
 export default Home;
