@@ -1,47 +1,54 @@
-// src/components/Home.js
-import React, { useState, useEffect } from "react";
-import ControlButtons from "../ControlButtons";
+import React, { useState } from "react";
+import TabButton from "../TabButton";
 import TimeCircle from "../TimeCircle";
+import ControlButtons from "../ControlButtons";
+import { FaCog } from "react-icons/fa";
 
-const Home = ({ setSessionData }) => {
+const Home = ({ isDarkMode, handleSessionComplete }) => {
+  const [tabsData, setTabsData] = useState([
+    { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
+    { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
+    { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
+  ]);
+
+  const [activeTab, setActiveTab] = useState(tabsData[0]?.value);
+  const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration);
   const [isRunning, setIsRunning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1500);
   const [resetSignal, setResetSignal] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isRunning) return;
+  const handleStartPause = () => setIsRunning((prev) => !prev);
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 0) {
-          clearInterval(timer);
-          logSession("Done Successfully");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  const toggleTimer = () => setIsRunning((prev) => !prev);
-  const resetTimer = () => {
+  const handleRestart = () => {
     setIsRunning(false);
-    setTimeLeft(1500);
+    const activeTabData = tabsData.find((tab) => tab.value === activeTab);
+    setTimeLeft(activeTabData?.duration || 0);
     setResetSignal((prev) => !prev);
-    logSession("Reset");
   };
 
-  const logSession = (status) => {
-    setSessionData((prev) => [
-      ...prev,
-      {
-        tab: "Pomodoro Session",
-        completionTime: new Date().toLocaleTimeString(),
-        status,
-      },
-    ]);
+  const handleComplete = () => {
+    const completionTime = new Date().toLocaleString();
+    handleSessionComplete({
+      tab: activeTab,
+      completionTime,
+      status: "Completed",
+    });
+    handleRestart();
+  };
+
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    const selectedTab = tabsData.find((tab) => tab.value === value);
+    setTimeLeft(selectedTab?.duration || 0);
+    setIsRunning(false);
+    setResetSignal((prev) => !prev);
+  };
+
+  const handleSaveSettings = (updatedTabs) => {
+    setTabsData(updatedTabs);
+    const updatedTab = updatedTabs.find((tab) => tab.value === activeTab);
+    setTimeLeft(updatedTab?.duration || 0);
+    setIsSettingsOpen(false);
   };
 
   const formatTime = (time) => {
@@ -51,13 +58,113 @@ const Home = ({ setSessionData }) => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <TimeCircle duration={formatTime(timeLeft)} isRunning={isRunning} resetSignal={resetSignal} />
-      <ControlButtons
-        isRunning={isRunning}
-        handleStartPause={toggleTimer}
-        handleRestart={resetTimer}
-      />
+    <div
+      className={`flex flex-col justify-center items-center min-h-screen ${
+        isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-black"
+      }`}
+    >
+      <div
+        className={`w-4/5 max-w-3xl p-8 rounded-lg shadow-lg ${
+          isDarkMode ? "bg-gray-900" : "bg-white"
+        }`}
+      >
+        <div className="flex justify-end">
+          <button className="text-2xl p-2" onClick={() => setIsSettingsOpen(true)}>
+            <FaCog />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex space-x-6 mb-8 justify-center">
+          {tabsData.map((tab) => (
+            <TabButton
+              key={tab.value}
+              tab={tab}
+              activeTab={activeTab}
+              setActiveTab={handleTabChange}
+            />
+          ))}
+        </div>
+
+        {/* Timer */}
+        <TimeCircle
+          duration={formatTime(timeLeft)}
+          isRunning={isRunning}
+          resetSignal={resetSignal}
+        />
+
+        {/* Controls */}
+        <ControlButtons
+          isRunning={isRunning}
+          handleStartPause={handleStartPause}
+          handleRestart={handleRestart}
+          handleComplete={handleComplete}
+          isDarkMode={isDarkMode}
+        />
+      </div>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <SettingsModal
+          tabsData={tabsData}
+          onSave={handleSaveSettings}
+          onClose={() => setIsSettingsOpen(false)}
+          isDarkMode={isDarkMode}
+        />
+      )}
+    </div>
+  );
+};
+
+const SettingsModal = ({ tabsData, onSave, onClose, isDarkMode }) => {
+  const [updatedTabs, setUpdatedTabs] = useState([...tabsData]);
+
+  const handleChange = (index, field, value) => {
+    const newTabs = [...updatedTabs];
+    newTabs[index][field] = field === "duration" ? parseInt(value) || 0 : value;
+    setUpdatedTabs(newTabs);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div
+        className={`p-6 rounded-lg shadow-lg ${
+          isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        }`}
+      >
+        <h2 className="text-2xl font-bold mb-4">Settings</h2>
+        {updatedTabs.map((tab, index) => (
+          <div key={tab.value} className="mb-4">
+            <label className="block text-sm font-medium">
+              {tab.label} Duration (seconds)
+            </label>
+            <input
+              type="number"
+              value={tab.duration}
+              onChange={(e) =>
+                handleChange(index, "duration", e.target.value)
+              }
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+        ))}
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded bg-gray-400 text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSave(updatedTabs)}
+            className="px-4 py-2 rounded bg-blue-500 text-white"
+          >
+            Save
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
