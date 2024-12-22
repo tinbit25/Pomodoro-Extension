@@ -1,118 +1,63 @@
-import React, { useState } from "react";
-import TabButton from "../TabButton";
-import TimeCircle from "../TimeCircle";
+// src/components/Home.js
+import React, { useState, useEffect } from "react";
 import ControlButtons from "../ControlButtons";
-import { FaCog } from "react-icons/fa";
+import TimeCircle from "../TimeCircle";
 
-const Home = ({ isDarkMode, handleSessionComplete }) => {
-  const [tabsData, setTabsData] = useState([
-    { label: "Pomodoro", value: "pomodoro", duration: "25:00" },
-    { label: "Short Break", value: "short-break", duration: "5:00" },
-    { label: "Long Break", value: "long-break", duration: "15:00" },
-  ]);
-
-  const [activeTab, setActiveTab] = useState(tabsData[0]?.value);
+const Home = ({ setSessionData }) => {
   const [isRunning, setIsRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(1500);
   const [resetSignal, setResetSignal] = useState(false);
-  const [sessionProgress, setSessionProgress] = useState({
-    pomodoro: 0,
-    shortBreak: 0,
-    longBreak: 0,
-  });
 
-  const handleStartPause = () => setIsRunning((prev) => !prev);
+  useEffect(() => {
+    if (!isRunning) return;
 
-  const handleRestart = () => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          logSession("Done Successfully");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isRunning]);
+
+  const toggleTimer = () => setIsRunning((prev) => !prev);
+  const resetTimer = () => {
     setIsRunning(false);
+    setTimeLeft(1500);
     setResetSignal((prev) => !prev);
+    logSession("Reset");
   };
 
-  const handleComplete = () => {
-    const completionTime = new Date().toLocaleString();
-    let isSuccess = false;
-
-    setSessionProgress((prev) => {
-      const updatedProgress = { ...prev };
-
-      if (activeTab === "pomodoro") updatedProgress.pomodoro += 1;
-      if (activeTab === "short-break") updatedProgress.shortBreak += 1;
-      if (activeTab === "long-break") updatedProgress.longBreak += 1;
-
-      if (
-        updatedProgress.pomodoro >= 1 &&
-        updatedProgress.shortBreak >= 1 &&
-        updatedProgress.longBreak >= 4
-      ) {
-        isSuccess = true;
-      }
-
-      return updatedProgress;
-    });
-
-    handleSessionComplete({
-      tab: activeTab,
-      completionTime,
-      status: isSuccess ? "Done Successfully" : "Fail Successfully",
-    });
-
-    if (isSuccess) {
-      setSessionProgress({ pomodoro: 0, shortBreak: 0, longBreak: 0 });
-    }
-
-    setIsRunning(false);
-    setResetSignal((prev) => !prev);
+  const logSession = (status) => {
+    setSessionData((prev) => [
+      ...prev,
+      {
+        tab: "Pomodoro Session",
+        completionTime: new Date().toLocaleTimeString(),
+        status,
+      },
+    ]);
   };
 
-  const currentTab = tabsData.find((tab) => tab.value === activeTab);
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60).toString().padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  };
 
   return (
-    <div
-      className={`flex flex-col justify-center items-center min-h-screen ${
-        isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-black"
-      }`}
-    >
-      <div
-        className={`w-4/5 max-w-3xl p-8 rounded-lg shadow-lg ${
-          isDarkMode ? "bg-gray-900" : "bg-white"
-        }`}
-      >
-        <div className="flex justify-end">
-          <button className="text-2xl p-2">
-            <FaCog />
-          </button>
-        </div>
-        <div className="flex space-x-6 mb-8 justify-center">
-          {tabsData.map((tab) => (
-            <TabButton
-              key={tab.value}
-              tab={tab}
-              activeTab={activeTab}
-              setActiveTab={(value) => setActiveTab(value)}
-            />
-          ))}
-        </div>
-        {currentTab && (
-          <TimeCircle
-            duration={currentTab.duration}
-            isRunning={isRunning}
-            resetSignal={resetSignal}
-          />
-        )}
-        <div className="mt-8">
-          <ControlButtons
-            isRunning={isRunning}
-            handleStartPause={handleStartPause}
-            handleRestart={handleRestart}
-            isDarkMode={isDarkMode}
-          />
-          <button
-            onClick={handleComplete}
-            className="mt-4 px-8 py-2 rounded-full bg-blue-500 text-white font-bold"
-          >
-            Complete
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col items-center space-y-4">
+      <TimeCircle duration={formatTime(timeLeft)} isRunning={isRunning} resetSignal={resetSignal} />
+      <ControlButtons
+        isRunning={isRunning}
+        handleStartPause={toggleTimer}
+        handleRestart={resetTimer}
+      />
     </div>
   );
 };
