@@ -1,4 +1,3 @@
-// TimeCircle.js
 import React, { useState, useEffect } from "react";
 
 const TimeCircle = ({ duration, isRunning, resetSignal }) => {
