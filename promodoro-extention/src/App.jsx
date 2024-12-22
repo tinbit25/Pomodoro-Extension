@@ -50,6 +50,7 @@ const App = () => {
   };
 
   return (
+
     <div className={`w-96 h-48 ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"} h-screen flex flex-col`}>
       <Header
         isDarkMode={isDarkMode}
@@ -113,6 +114,7 @@ const App = () => {
             </motion.div>
           </div>
         )}
+
       </main>
     </div>
   );

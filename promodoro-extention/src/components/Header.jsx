@@ -1,5 +1,6 @@
 import React from "react";
 
+
 const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogin, onLogout }) => {
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b">
@@ -34,4 +35,5 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogin, onLogout }) => {
 };
 
 export default Header;
+
 
