@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState } from "react";
 import Header from "./components/Header";
 import Home from "./components/pages/Home";
@@ -11,9 +10,17 @@ const App = () => {
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
   return (
-    <div className={`w-96 h-48 ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"} h-screen flex flex-col`}>
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-      <main className="flex-1 p-4">
+    <div
+      className={`w-[360px] h-[600px] ${
+        isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"
+      } flex flex-col shadow-lg border border-gray-300`}
+    >
+      <Header
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+        profilePic="/path/to/user-profile.jpg" // Replace with an actual image path or user profile URL
+      />
+      <main className="flex-1 p-2 overflow-y-auto">
         <Home setSessionData={setSessionData} />
         <States sessionData={sessionData} />
       </main>
