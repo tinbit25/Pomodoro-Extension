@@ -5,7 +5,7 @@
   "version": "1.0",
   "action": {
     "default_popup": "index.html",
-    "default_icon": "icon.jpg"
+    "default_icon": "icon.png"
   },
   "permissions": [],
   "background": {
@@ -18,8 +18,8 @@
     }
   ],
   "icons": {
-    "16": "icon.jpg",
-    "48": "icon.jpg",
-    "128": "icon.jpg"
+    "16": "dist/icon1.png",
+    "48": "dist/icon2.png",
+    "128": "dist/icon.png"
   }
 }
