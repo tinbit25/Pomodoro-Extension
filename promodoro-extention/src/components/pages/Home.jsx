@@ -4,7 +4,7 @@ import TimeCircle from "../TimeCircle";
 import ControlButtons from "../ControlButtons";
 import { FaCog } from "react-icons/fa";
 
-const Home = ({ isDarkMode, handleSessionComplete }) => {
+const Home = ({ handleSessionComplete }) => {
   const [tabsData, setTabsData] = useState([
     { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
     { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
@@ -58,16 +58,8 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
   };
 
   return (
-    <div
-      className={`flex flex-col justify-center items-center min-h-screen ${
-        isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-black"
-      }`}
-    >
-      <div
-        className={`w-4/5 max-w-3xl p-8 rounded-lg shadow-lg ${
-          isDarkMode ? "bg-gray-900" : "bg-white"
-        }`}
-      >
+    <div className="flex flex-col justify-center items-center min-h-screen">
+      <div className="w-4/5 max-w-3xl p-8 rounded-lg shadow-lg">
         <div className="flex justify-end">
           <button className="text-2xl p-2" onClick={() => setIsSettingsOpen(true)}>
             <FaCog />
@@ -87,11 +79,7 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
         </div>
 
         {/* Timer */}
-        <TimeCircle
-          duration={formatTime(timeLeft)}
-          isRunning={isRunning}
-          resetSignal={resetSignal}
-        />
+        <TimeCircle duration={formatTime(timeLeft)} isRunning={isRunning} resetSignal={resetSignal} />
 
         {/* Controls */}
         <ControlButtons
@@ -99,7 +87,6 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
           handleStartPause={handleStartPause}
           handleRestart={handleRestart}
           handleComplete={handleComplete}
-          isDarkMode={isDarkMode}
         />
       </div>
 
@@ -109,14 +96,13 @@ const Home = ({ isDarkMode, handleSessionComplete }) => {
           tabsData={tabsData}
           onSave={handleSaveSettings}
           onClose={() => setIsSettingsOpen(false)}
-          isDarkMode={isDarkMode}
         />
       )}
     </div>
   );
 };
 
-const SettingsModal = ({ tabsData, onSave, onClose, isDarkMode }) => {
+const SettingsModal = ({ tabsData, onSave, onClose }) => {
   const [updatedTabs, setUpdatedTabs] = useState([...tabsData]);
 
   const handleChange = (index, field, value) => {
@@ -126,14 +112,8 @@ const SettingsModal = ({ tabsData, onSave, onClose, isDarkMode }) => {
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-    >
-      <div
-        className={`p-6 rounded-lg shadow-lg ${
-          isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-        }`}
-      >
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="p-6 rounded-lg shadow-lg bg-white">
         <h2 className="text-2xl font-bold mb-4">Settings</h2>
         {updatedTabs.map((tab, index) => (
           <div key={tab.value} className="mb-4">
@@ -143,24 +123,16 @@ const SettingsModal = ({ tabsData, onSave, onClose, isDarkMode }) => {
             <input
               type="number"
               value={tab.duration}
-              onChange={(e) =>
-                handleChange(index, "duration", e.target.value)
-              }
+              onChange={(e) => handleChange(index, "duration", e.target.value)}
               className="w-full mt-1 p-2 border rounded"
             />
           </div>
         ))}
         <div className="flex justify-end space-x-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-400 text-white"
-          >
+          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-400 text-white">
             Cancel
           </button>
-          <button
-            onClick={() => onSave(updatedTabs)}
-            className="px-4 py-2 rounded bg-blue-500 text-white"
-          >
+          <button onClick={() => onSave(updatedTabs)} className="px-4 py-2 rounded bg-blue-500 text-white">
             Save
           </button>
         </div>
