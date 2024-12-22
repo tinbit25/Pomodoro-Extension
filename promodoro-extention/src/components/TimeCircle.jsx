@@ -17,19 +17,25 @@ const TimeCircle = ({ duration, isRunning, resetSignal }) => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  const circleSize = "200px"; // Adjusted size for a smaller, responsive circle
+
   return (
     <div
-      className={`w-64 h-64 
-                  bg-transparent 
-                  rounded-full 
-                  border-4 border-white 
-                  flex justify-center items-center shadow-lg 
-                  mx-auto mt-8 
-                  ${isRunning ? "bg-sky-800 text-black" : "bg-sky-100 text-black"}
-                  transition-all duration-300
-                  dark:bg-sky-800 dark:text-white`}
+      className={`flex justify-center items-center rounded-full shadow-lg mx-auto mt-8 transition-all duration-300`}
+      style={{
+        width: circleSize,
+        height: circleSize,
+        border: "4px solid",
+        borderColor: isRunning ? "#0284c7" : "#e2e8f0", // Dynamic color
+        backgroundColor: isRunning ? "#bfdbfe" : "#f1f5f9", // Dynamic background
+      }}
     >
-      <span className="font-bold text-6xl">
+      <span
+        className="font-bold text-4xl"
+        style={{
+          color: isRunning ? "#1e40af" : "#334155", // Text color based on state
+        }}
+      >
         {formatTime(timeLeft)}
       </span>
     </div>
