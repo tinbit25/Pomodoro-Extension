@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-const ControlButtons = ({ isRunning, handleStartPause, handleRestart, handleNextSession }) => (
+const ControlButtons = ({
+  isRunning,
+  handleStartPause,
+  handleRestart,
+  focusTimeProgress,
+  focusTimeTotal
+}) => (
   <div className="flex space-x-4">
     <button
       onClick={handleStartPause}
@@ -14,12 +20,13 @@ const ControlButtons = ({ isRunning, handleStartPause, handleRestart, handleNext
     >
       Restart
     </button>
-    <button
-      onClick={handleNextSession}
-      className="px-4 py-2 rounded-full text-white font-bold bg-blue-500 hover:bg-blue-600"
-    >
-      Next Session
-    </button>
+    
+    {/* Focus Time Progress */}
+    {focusTimeProgress < focusTimeTotal && (
+      <div className="text-xl text-white font-bold mt-2">
+        Focus Time: {focusTimeProgress} / {focusTimeTotal}
+      </div>
+    )}
   </div>
 );
 

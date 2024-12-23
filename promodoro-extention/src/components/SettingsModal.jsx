@@ -14,8 +14,8 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="p-6 rounded-lg shadow-lg bg-white">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="p-6 rounded-lg shadow-lg bg-white max-w-md w-full">
         <h2 className="text-2xl font-bold mb-4">Settings</h2>
         {updatedTabs.map((tab, index) => (
           <div key={tab.value} className="mb-4">
@@ -48,6 +48,7 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
     </div>
   );
 };
+
 
 
 export default SettingsModal;

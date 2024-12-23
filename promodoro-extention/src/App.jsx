@@ -16,59 +16,76 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
+  // Toggle theme (dark mode)
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
-  // Check login status on app load
+  // Check login status when the app loads
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true); // User is logged in
+      setIsLoggedIn(true); // Set user as logged in if token exists
     }
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
+  // Handle login success and redirect
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true); // Set login state to true
-    navigate("/"); // Navigate to the home page after successful login
+    setIsLoggedIn(true);
+    navigate("/"); // Redirect to home page after login
   };
 
+  // Handle signup success and redirect
   const handleSignupSuccess = () => {
-    navigate("/login"); // Redirect to login page after successful signup
+    navigate("/login"); // Redirect to login page after signup
   };
 
+  // Handle logout
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("token");
-    navigate("/login");
+    localStorage.removeItem("token"); // Remove token from local storage
+    navigate("/login"); // Redirect to login page after logout
+  };
+
+  // Handle session complete (update session data)
+  const handleSessionComplete = (sessionDetails) => {
+    // Update session data (this could be stored in a database or displayed on the status page)
+    setSessionData(sessionDetails);
+    console.log("Session Completed: ", sessionDetails);
   };
 
   return (
     <div
       className={`${
         isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"
-      } w-96 h-full flex flex-col rounded-xl`}
+      } w-96 h-full flex flex-col rounded-xl transition-colors duration-300`}
     >
+      {/* Header */}
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
       />
+
+      {/* Main content */}
       <main className="flex-1 p-4">
         <Routes>
           <Route
             path="/"
-            element={<Home setSessionData={setSessionData} />}
+            element={<Home handleSessionComplete={handleSessionComplete} />}
           />
           <Route
             path="/signup"
             element={<Signup onSignupSuccess={handleSignupSuccess} />}
           />
-          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+          <Route
+            path="/login"
+            element={<Login onLoginSuccess={handleLoginSuccess} />}
+          />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/status" element={<Status />} />
+          <Route path="/status" element={<Status sessionData={sessionData} />} />
         </Routes>
       </main>
     </div>
