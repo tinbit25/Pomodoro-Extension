@@ -1,37 +1,45 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader, Mail, Lock } from "lucide-react";
-import { Link } from 'react-router-dom';
-import Input from '../Input';
+import { Link, useNavigate } from "react-router-dom";
+import Input from "../Input";
 
 const Login = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // Initialize navigate
 
+  
   const handleLogin = async (email, password) => {
     setIsLoading(true);
     setError("");
-
+  
     try {
-      const response = await fetch("https://your-backend.com/auth/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await response.json();
+  
+      console.log("Login Response Data:", data);
+  
       if (response.ok) {
-        onLoginSuccess(data.token);
+        localStorage.setItem("token", data.token); // Store token
+        onLoginSuccess(); // Call the parent callback
       } else {
         setError(data.message || "Invalid credentials.");
       }
     } catch (err) {
+      console.error("Login Error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -48,6 +56,9 @@ const Login = ({ onLoginSuccess }) => {
       >
         <Input icon={Mail} type="text" placeholder="Email Address" name="email" />
         <Input icon={Lock} type="password" placeholder="Password" name="password" />
+        <Link to="/forgot-password" className="text-green-400 hover:underline mb-3">
+          Forgot Password?
+        </Link>
         {error && <p className="text-red-500 font-semibold mb-2">{error}</p>}
         <motion.button
           className="w-full m-3 p-3 rounded-lg font-bold bg-green-500 hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200"
@@ -59,8 +70,10 @@ const Login = ({ onLoginSuccess }) => {
       </form>
       <div className="flex px-8 py-4 bg-gray-900 bg-opacity-50 justify-center">
         <p className="text-sm text-gray-400">
-          Don't have an account?{" "}
-          <Link to={'/signup'} className="text-green-400 hover:underline">Signup</Link>
+          Do you have an account?{" "}
+          <Link to="/signup" className="text-green-400 hover:underline">
+            Signup
+          </Link>
         </p>
       </div>
     </motion.div>
