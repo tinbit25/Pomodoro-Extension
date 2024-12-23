@@ -1,14 +1,13 @@
 import React from "react";
-import PropTypes from "prop-types";
+import {Link} from "react-router-dom";
 
 const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogin, onLogout }) => {
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b flex-wrap">
+    <header className="flex items-center justify-between px-4 py-2 border-b">
       <h1 className="text-xl font-bold">Pomodoro Timer</h1>
-      <div className="flex items-center space-x-4 mt-2 sm:mt-0">
+      <div className="flex items-center space-x-4">
         <button
-          aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
-          className={`px-3 py-1 rounded transition-colors duration-300 ${
+          className={`px-3 py-1 rounded ${
             isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200"
           }`}
           onClick={toggleTheme}
@@ -16,15 +15,18 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogin, onLogout }) => {
           {isDarkMode ? "🌙" : "☀️"}
         </button>
         {isLoggedIn ? (
+          <Link to="/logout">
           <button
-            className="px-3 py-1 bg-red-500 text-white rounded transition duration-300 hover:bg-red-700"
+          
+            className="px-3 py-1 bg-red-500 text-white rounded"
             onClick={onLogout}
           >
             Logout
           </button>
+          </Link>
         ) : (
           <button
-            className="px-3 py-1 bg-green-500 text-white rounded transition duration-300 hover:bg-green-700"
+            className="px-3 py-1 bg-green-500 text-white rounded"
             onClick={onLogin}
           >
             Login
@@ -35,12 +37,6 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogin, onLogout }) => {
   );
 };
 
-Header.propTypes = {
-  isDarkMode: PropTypes.bool.isRequired,
-  toggleTheme: PropTypes.func.isRequired,
-  isLoggedIn: PropTypes.bool.isRequired,
-  onLogin: PropTypes.func.isRequired,
-  onLogout: PropTypes.func.isRequired,
-};
-
 export default Header;
+
+

@@ -116,34 +116,37 @@ exports.forgotPassword = async (req, res) => {
 };
 
 // Reset password
+// Reset password
 exports.resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
-
+  
     try {
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpiredAt: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
-        }
-
-        const hashedPassword = await bcryptjs.hash(password, 10);
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpiredAt = undefined;
-
-        await user.save();
-        await sendResetSuccessEmail(user.email);
-
-        res.status(200).json({ success: true, message: "Password reset successfully" });
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpiredAt: { $gt: Date.now() },  // Ensure token is still valid
+      });
+  
+      if (!user) {
+        return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+      }
+  
+      // Hash the new password before saving it
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      user.password = hashedPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpiredAt = undefined;
+  
+      await user.save();
+      await sendResetSuccessEmail(user.email);  // Send reset success email
+  
+      res.status(200).json({ success: true, message: "Password reset successfully" });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+      console.error(error);
+      res.status(400).json({ success: false, message: error.message });
     }
-};
-
+  };
+  
 // Check authentication
 exports.checkAuth = async (req, res) => {
     try {
