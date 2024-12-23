@@ -16,12 +16,29 @@ const Home = ({ handleSessionComplete }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [resetSignal, setResetSignal] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [cycleCount, setCycleCount] = useState(0);
+
+  useEffect(() => {
+    // Request notification permission on component mount
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const notify = (message) => {
+    if (Notification.permission === "granted") {
+      new Notification("Pomodoro Timer", {
+        body: message,
+        icon: "/favicon.ico",
+      });
+    }
+  };
 
   const handleStartPause = () => setIsRunning((prev) => !prev);
 
   const handleRestart = () => {
     setIsRunning(false);
-    setTimeLeft(tabsData[activeTabIndex]?.duration || 0); // Fixed here
+    setTimeLeft(tabsData[activeTabIndex]?.duration || 0);
     setResetSignal((prev) => !prev);
   };
 
@@ -29,20 +46,30 @@ const Home = ({ handleSessionComplete }) => {
     setIsRunning(false);
     const nextIndex = (activeTabIndex + 1) % tabsData.length;
     setActiveTabIndex(nextIndex);
-    setTimeLeft(tabsData[nextIndex]?.duration || 0); // Fixed here
+    setTimeLeft(tabsData[nextIndex]?.duration || 0);
     setResetSignal((prev) => !prev);
+
+    // Update cycle count
+    if (activeTabIndex === tabsData.length - 1) {
+      setCycleCount((prev) => prev + 1);
+    }
   };
 
   const handleComplete = () => {
+    const tab = tabsData[activeTabIndex];
     const completionTime = new Date().toLocaleString();
     handleSessionComplete({
-      tab: tabsData[activeTabIndex].value,
+      tab: tab.value,
       completionTime,
       status: "Completed",
     });
 
-    if (activeTabIndex === tabsData.length - 1) {
-      alert("Congratulations! You completed one full Pomodoro cycle.");
+    notify(`Session "${tab.label}" completed!`);
+
+    if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
+      notify("Congratulations! You completed one full Pomodoro cycle!");
+      alert("You completed a full Pomodoro cycle!");
+      setCycleCount(0); // Reset cycle count for the next round
     } else {
       handleNextSession();
     }
@@ -52,8 +79,9 @@ const Home = ({ handleSessionComplete }) => {
     if (!isRunning) return;
 
     if (timeLeft === 0) {
-      const sound = new Audio("/sounds/notification.mp3"); // Replace with your sound file path
+      const sound = new Audio(`${process.env.PUBLIC_URL}/audio.mp3`);
       sound.play();
+
       handleComplete();
       return;
     }
@@ -68,7 +96,7 @@ const Home = ({ handleSessionComplete }) => {
   const handleTabChange = (value) => {
     const index = tabsData.findIndex((tab) => tab.value === value);
     setActiveTabIndex(index);
-    setTimeLeft(tabsData[index]?.duration || 0); // Fixed here
+    setTimeLeft(tabsData[index]?.duration || 0);
     setIsRunning(false);
     setResetSignal((prev) => !prev);
   };
@@ -76,7 +104,7 @@ const Home = ({ handleSessionComplete }) => {
   const handleSaveSettings = (updatedTabs) => {
     setTabsData(updatedTabs);
     const updatedTab = updatedTabs[activeTabIndex];
-    setTimeLeft(updatedTab?.duration || 0); // Fixed here
+    setTimeLeft(updatedTab?.duration || 0);
     setIsSettingsOpen(false);
   };
 
@@ -141,51 +169,7 @@ const Home = ({ handleSessionComplete }) => {
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
-    </div>
-  );
-};
-
-const SettingsModal = ({ tabsData, onSave, onClose }) => {
-  const [updatedTabs, setUpdatedTabs] = useState([...tabsData]);
-
-  const handleChange = (index, field, value) => {
-    const newTabs = [...updatedTabs];
-    newTabs[index][field] = field === "duration" ? parseInt(value) || 0 : value;
-    setUpdatedTabs(newTabs);
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="p-6 rounded-lg shadow-lg bg-white">
-        <h2 className="text-2xl font-bold mb-4">Settings</h2>
-        {updatedTabs.map((tab, index) => (
-          <div key={tab.value} className="mb-4">
-            <label className="block text-sm font-medium">
-              {tab.label} Duration (seconds)
-            </label>
-            <input
-              type="number"
-              value={tab.duration}
-              onChange={(e) => handleChange(index, "duration", e.target.value)}
-              className="w-full mt-1 p-2 border rounded-full"
-            />
-          </div>
-        ))}
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-gray-500"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave(updatedTabs)}
-            className="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Save
-          </button>
-        </div>
-      </div>
+      
     </div>
   );
 };

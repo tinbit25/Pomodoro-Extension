@@ -5,39 +5,41 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
 
   const handleChange = (index, field, value) => {
     const newTabs = [...updatedTabs];
-    const parsedValue = parseInt(value) || 0;
-    if (parsedValue <= 0) return;  // Prevent invalid duration (e.g., 0 or negative)
-    newTabs[index][field] = parsedValue;
+    newTabs[index][field] = field === "duration" ? parseInt(value) || 0 : value;
     setUpdatedTabs(newTabs);
   };
 
+  const handleSave = () => {
+    onSave(updatedTabs);
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
-      <div className="p-6 rounded-xl shadow-lg bg-white transform transition-all duration-300 scale-110 animate-fade-in">
-        <h2 className="text-3xl font-bold mb-6 text-center text-purple-700">Settings</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="p-6 rounded-lg shadow-lg bg-white">
+        <h2 className="text-2xl font-bold mb-4">Settings</h2>
         {updatedTabs.map((tab, index) => (
-          <div key={tab.value} className="mb-6">
-            <label className="block text-lg font-medium text-gray-600">
+          <div key={tab.value} className="mb-4">
+            <label className="block text-sm font-medium">
               {tab.label} Duration (seconds)
             </label>
             <input
               type="number"
               value={tab.duration}
               onChange={(e) => handleChange(index, "duration", e.target.value)}
-              className="w-full mt-3 p-4 border border-gray-300 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200"
+              className="w-full mt-1 p-2 border rounded-full"
             />
           </div>
         ))}
-        <div className="flex justify-end space-x-6">
+        <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}
-            className="px-6 py-3 rounded-lg bg-gray-400 text-white hover:bg-gray-500 transition duration-300"
+            className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-gray-500"
           >
             Cancel
           </button>
           <button
-            onClick={() => onSave(updatedTabs)}
-            className="px-6 py-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+            onClick={handleSave}
+            className="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600"
           >
             Save
           </button>
@@ -46,5 +48,6 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
     </div>
   );
 };
+
 
 export default SettingsModal;
