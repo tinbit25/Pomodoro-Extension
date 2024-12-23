@@ -6,11 +6,12 @@ import { FaCog } from "react-icons/fa";
 
 const Home = ({ handleSessionComplete }) => {
   const [tabsData, setTabsData] = useState([
-    { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
+    { label: "Focus-time", value: "focus-time", duration: 1 }, // 25 minutes
     { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
     { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
   ]);
 
+  const [cycleCount, setCycleCount] = useState(0); // Tracks cycles completed
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration);
   const [isRunning, setIsRunning] = useState(false);
@@ -21,15 +22,30 @@ const Home = ({ handleSessionComplete }) => {
 
   const handleRestart = () => {
     setIsRunning(false);
-    setTimeLeft(tabsData[activeTabIndex]?.duration || 0); // Fixed here
+    setTimeLeft(tabsData[activeTabIndex]?.duration || 0);
     setResetSignal((prev) => !prev);
   };
 
   const handleNextSession = () => {
     setIsRunning(false);
-    const nextIndex = (activeTabIndex + 1) % tabsData.length;
-    setActiveTabIndex(nextIndex);
-    setTimeLeft(tabsData[nextIndex]?.duration || 0); // Fixed here
+
+    if (activeTabIndex === 0) {
+      const nextIndex = cycleCount < 3 ? 1 : 2; // Short Break for first 3 cycles, Long Break for the last
+      setActiveTabIndex(nextIndex);
+      setTimeLeft(tabsData[nextIndex]?.duration || 0);
+
+      if (nextIndex === 2) {
+        setCycleCount(0); // Reset cycles after Long Break
+      }
+    } else {
+      setActiveTabIndex(0); // Return to Focus-time
+      setTimeLeft(tabsData[0]?.duration || 0);
+
+      if (activeTabIndex === 1) {
+        setCycleCount((prev) => prev + 1); // Increment cycles after Short Break
+      }
+    }
+
     setResetSignal((prev) => !prev);
   };
 
@@ -41,19 +57,15 @@ const Home = ({ handleSessionComplete }) => {
       status: "Completed",
     });
 
-    if (activeTabIndex === tabsData.length - 1) {
-      alert("Congratulations! You completed one full Pomodoro cycle.");
-    } else {
-      handleNextSession();
-    }
+    const sound = new Audio("/sounds/notification.mp3"); // Replace with your sound file path
+    sound.play();
+    handleNextSession();
   };
 
   useEffect(() => {
     if (!isRunning) return;
 
     if (timeLeft === 0) {
-      const sound = new Audio("/sounds/notification.mp3"); // Replace with your sound file path
-      sound.play();
       handleComplete();
       return;
     }
@@ -68,7 +80,7 @@ const Home = ({ handleSessionComplete }) => {
   const handleTabChange = (value) => {
     const index = tabsData.findIndex((tab) => tab.value === value);
     setActiveTabIndex(index);
-    setTimeLeft(tabsData[index]?.duration || 0); // Fixed here
+    setTimeLeft(tabsData[index]?.duration || 0);
     setIsRunning(false);
     setResetSignal((prev) => !prev);
   };
@@ -76,7 +88,7 @@ const Home = ({ handleSessionComplete }) => {
   const handleSaveSettings = (updatedTabs) => {
     setTabsData(updatedTabs);
     const updatedTab = updatedTabs[activeTabIndex];
-    setTimeLeft(updatedTab?.duration || 0); // Fixed here
+    setTimeLeft(updatedTab?.duration || 0);
     setIsSettingsOpen(false);
   };
 
@@ -118,19 +130,12 @@ const Home = ({ handleSessionComplete }) => {
         />
 
         {/* Controls */}
-        <div className="flex space-x-4">
-          <ControlButtons
-            isRunning={isRunning}
-            handleStartPause={handleStartPause}
-            handleRestart={handleRestart}
-          />
-          <button
-            onClick={handleNextSession}
-            className="px-4 py-2 rounded-full text-white font-bold bg-blue-500 hover:bg-blue-600"
-          >
-            Next Session
-          </button>
-        </div>
+        <ControlButtons
+          isRunning={isRunning}
+          handleStartPause={handleStartPause}
+          handleRestart={handleRestart}
+          handleNextSession={handleNextSession}
+        />
       </div>
 
       {/* Settings Modal */}
@@ -145,49 +150,5 @@ const Home = ({ handleSessionComplete }) => {
   );
 };
 
-const SettingsModal = ({ tabsData, onSave, onClose }) => {
-  const [updatedTabs, setUpdatedTabs] = useState([...tabsData]);
-
-  const handleChange = (index, field, value) => {
-    const newTabs = [...updatedTabs];
-    newTabs[index][field] = field === "duration" ? parseInt(value) || 0 : value;
-    setUpdatedTabs(newTabs);
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="p-6 rounded-lg shadow-lg bg-white">
-        <h2 className="text-2xl font-bold mb-4">Settings</h2>
-        {updatedTabs.map((tab, index) => (
-          <div key={tab.value} className="mb-4">
-            <label className="block text-sm font-medium">
-              {tab.label} Duration (seconds)
-            </label>
-            <input
-              type="number"
-              value={tab.duration}
-              onChange={(e) => handleChange(index, "duration", e.target.value)}
-              className="w-full mt-1 p-2 border rounded-full"
-            />
-          </div>
-        ))}
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-gray-500"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave(updatedTabs)}
-            className="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default Home;
