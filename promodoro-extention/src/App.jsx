@@ -17,17 +17,17 @@ const App = () => {
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
+  // Check login status on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true);
-      navigate("/"); // Redirect to home page if logged in
+      setIsLoggedIn(true); // User is logged in
     }
-  }, [navigate]);
+  }, []); // Empty dependency array ensures this runs only once
 
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true);  // Set login state to true
-    navigate("/"); // Navigate to the home page
+    setIsLoggedIn(true); // Set login state to true
+    navigate("/"); // Navigate to the home page after successful login
   };
 
   const handleSignupSuccess = () => {
@@ -56,25 +56,16 @@ const App = () => {
         <Routes>
           <Route
             path="/"
-            element={
-              isLoggedIn ? (
-                <>
-                  <Home setSessionData={setSessionData} />
-                  <States sessionData={sessionData} />
-                </>
-              ) : (
-                <Login onLoginSuccess={handleLoginSuccess} />
-              )
-            }
+            element={<Home setSessionData={setSessionData} />}
           />
           <Route
             path="/signup"
             element={<Signup onSignupSuccess={handleSignupSuccess} />}
           />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/forgot-password" element={<ForgotPassword  />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/logout" element={<Logout  />} />
+          <Route path="/logout" element={<Logout />} />
         </Routes>
       </main>
     </div>

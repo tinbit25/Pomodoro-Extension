@@ -29,4 +29,11 @@
   
     "open_in_tab": true
   }
+  ,  "web_accessible_resources": [
+    {
+      "resources": ["index.html", "assets/*.js", "assets/*.css"],
+      "matches": ["<all_urls>"]
+    }
+  
+  ]
 }

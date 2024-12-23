@@ -48,7 +48,7 @@ function resetTimer() {
   seconds = 0;
 }
 
-// Respond to messages from the popup (index.html) or other parts of the extension
+// Respond to messages from the  (index.html) or other parts of the extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'start') {
     startTimer();
