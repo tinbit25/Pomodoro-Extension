@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Home from "./components/pages/Home";
-import States from "./components/pages/States";
+import Status from "./components/pages/StatusPage";
 import Login from "./components/pages/Login";
 import Signup from "./components/pages/Signup";
 import ForgotPassword from "./components/pages/ForgotPassword";
 import Logout from "./components/pages/Logout";
 import ResetPassword from "./components/pages/ResetPassword";
+import Profile from "./components/pages/Profile";
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -44,7 +45,7 @@ const App = () => {
     <div
       className={`${
         isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"
-      } w-96 h-full flex flex-col`}
+      } w-96 h-full flex flex-col rounded-xl`}
     >
       <Header
         isDarkMode={isDarkMode}
@@ -66,6 +67,8 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/status" element={<Status />} />
         </Routes>
       </main>
     </div>

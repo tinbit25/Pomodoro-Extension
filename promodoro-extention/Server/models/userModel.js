@@ -22,14 +22,19 @@ const userSchema = new mongoose.Schema({
     },
     lastLogin: {
         type: Date,
-        default: Date.now
+        default: null
     },
     isVerified: {
         type: Boolean,
-        default: true  // No verification needed, so users are automatically verified
+        default: true  // Users are automatically verified
     },
     resetPasswordToken: String,
     resetPasswordExpiredAt: Date,
+    status: {
+        type: String,
+        enum: ['active', 'inactive', 'banned'],
+        default: 'active' // Default status is active
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

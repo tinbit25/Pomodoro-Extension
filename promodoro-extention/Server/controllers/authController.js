@@ -23,13 +23,13 @@ exports.signup = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            isVerified: true // Skip verification process, automatically verified
+            isVerified: true, 
+            status: 'active' // Set initial status
         });
 
         await user.save();
         generateTokenAndSetCookie(res, user._id);
 
-        // Send welcome email
         await sendWelcomeEmail(user.email, user.name);
 
         res.status(201).json({
@@ -38,17 +38,10 @@ exports.signup = async (req, res) => {
             user: { ...user._doc, password: undefined }
         });
     } catch (error) {
-        return res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
-// Email verification (skipped, as verification is bypassed)
-exports.verifyEmail = async (req, res) => {
-    return res.status(400).json({
-        success: false,
-        message: "Email verification is not required for this process."
-    });
-};
 
 // User login
 exports.login = async (req, res) => {
@@ -60,7 +53,16 @@ exports.login = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
-        if (!user || !await bcryptjs.compare(password, user.password)) {
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        if (user.status !== 'active') {
+            return res.status(403).json({ success: false, message: 'User account is not active' });
+        }
+
+        const isMatch = await bcryptjs.compare(password, user.password);
+        if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
 
@@ -78,6 +80,7 @@ exports.login = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
 
 // User logout
 exports.logout = async (req, res) => {
@@ -98,11 +101,13 @@ exports.forgotPassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
-        // Generate reset token
+        if (user.status !== 'active') {
+            return res.status(403).json({ success: false, message: 'User account is not active' });
+        }
+
         const resetToken = crypto.randomBytes(20).toString('hex');
-        const resetTokenExpiredAt = Date.now() + 1 * 60 * 60 * 1000;
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpiredAt = resetTokenExpiredAt;
+        user.resetPasswordExpiredAt = Date.now() + 1 * 60 * 60 * 1000;
         await user.save();
 
         await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
@@ -115,7 +120,6 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
-// Reset password
 // Reset password
 exports.resetPassword = async (req, res) => {
     const { token } = req.params;
@@ -148,15 +152,5 @@ exports.resetPassword = async (req, res) => {
   };
   
 // Check authentication
-exports.checkAuth = async (req, res) => {
-    try {
-        const user = await User.findById(req.userId).select("-password");
-        if (!user) {
-            return res.status(400).json({ success: false, message: "User not found" });
-        }
 
-        res.status(200).json({ success: true, user });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
+
