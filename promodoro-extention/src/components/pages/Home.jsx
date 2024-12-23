@@ -6,17 +6,18 @@ import { FaCog } from "react-icons/fa";
 
 const Home = ({ handleSessionComplete }) => {
   const [tabsData, setTabsData] = useState([
-    { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
+    { label: "Focus-time", value: "focus-time", duration: 1 }, // 25 minutes
     { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
     { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
   ]);
 
+  const [cycleCount, setCycleCount] = useState(0); // Tracks cycles completed
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration);
   const [isRunning, setIsRunning] = useState(false);
   const [resetSignal, setResetSignal] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [cycleCount, setCycleCount] = useState(0);
+  
 
   useEffect(() => {
     // Request notification permission on component mount
@@ -44,9 +45,25 @@ const Home = ({ handleSessionComplete }) => {
 
   const handleNextSession = () => {
     setIsRunning(false);
-    const nextIndex = (activeTabIndex + 1) % tabsData.length;
-    setActiveTabIndex(nextIndex);
-    setTimeLeft(tabsData[nextIndex]?.duration || 0);
+
+    if (activeTabIndex === 0) {
+      const nextIndex = cycleCount < 3 ? 1 : 2; // Short Break for first 3 cycles, Long Break for the last
+      setActiveTabIndex(nextIndex);
+      setTimeLeft(tabsData[nextIndex]?.duration || 0);
+
+      if (nextIndex === 2) {
+        setCycleCount(0); // Reset cycles after Long Break
+      }
+    } else {
+      setActiveTabIndex(0); // Return to Focus-time
+      setTimeLeft(tabsData[0]?.duration || 0);
+
+      if (activeTabIndex === 1) {
+        setCycleCount((prev) => prev + 1); // Increment cycles after Short Break
+      }
+    }
+
+
     setResetSignal((prev) => !prev);
 
     // Update cycle count
@@ -64,6 +81,7 @@ const Home = ({ handleSessionComplete }) => {
       status: "Completed",
     });
 
+
     notify(`Session "${tab.label}" completed!`);
 
     if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
@@ -73,12 +91,14 @@ const Home = ({ handleSessionComplete }) => {
     } else {
       handleNextSession();
     }
+
   };
 
   useEffect(() => {
     if (!isRunning) return;
 
     if (timeLeft === 0) {
+
       const sound = new Audio(`${process.env.PUBLIC_URL}/audio.mp3`);
       sound.play();
 
@@ -146,19 +166,12 @@ const Home = ({ handleSessionComplete }) => {
         />
 
         {/* Controls */}
-        <div className="flex space-x-4">
-          <ControlButtons
-            isRunning={isRunning}
-            handleStartPause={handleStartPause}
-            handleRestart={handleRestart}
-          />
-          <button
-            onClick={handleNextSession}
-            className="px-4 py-2 rounded-full text-white font-bold bg-blue-500 hover:bg-blue-600"
-          >
-            Next Session
-          </button>
-        </div>
+        <ControlButtons
+          isRunning={isRunning}
+          handleStartPause={handleStartPause}
+          handleRestart={handleRestart}
+          handleNextSession={handleNextSession}
+        />
       </div>
 
       {/* Settings Modal */}
@@ -169,9 +182,11 @@ const Home = ({ handleSessionComplete }) => {
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
+
       
     </div>
   );
 };
+
 
 export default Home;
