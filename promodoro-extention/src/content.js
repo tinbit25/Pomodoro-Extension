@@ -1,3 +1,5 @@
+console.log('Content script loaded');
+
 // document.addEventListener("DOMContentLoaded", () => {
 //     const startButton = document.getElementById("startButton");
 //     const stopButton = document.getElementById("stopButton");

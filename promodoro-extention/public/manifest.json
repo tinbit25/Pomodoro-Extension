@@ -1,13 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Pomodoro Timer",
-  "description": "A simple Pomodoro timer for Chrome.",
+  "description": "A customizable Pomodoro timer with notifications and dark mode.",
   "version": "1.0",
+  "permissions": [
+    "storage",
+    "notifications"
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": "icon.png"
   },
-  "permissions": [],
   "background": {
     "service_worker": "background.js"
   },
@@ -21,5 +24,16 @@
     "16": "icon2.png",
     "48": "icon1.png",
     "128": "icon.png"
+  },
+  "options_ui": {
+  
+    "open_in_tab": true
   }
+  ,  "web_accessible_resources": [
+    {
+      "resources": ["index.html", "assets/*.js", "assets/*.css"],
+      "matches": ["<all_urls>"]
+    }
+  
+  ]
 }

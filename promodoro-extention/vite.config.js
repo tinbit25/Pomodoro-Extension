@@ -5,11 +5,12 @@ import fs from 'fs';
 import path from 'path';
 
 export default defineConfig({
+  
   plugins: [react()],
   build: {
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'index.html'),
+        popup: resolve(__dirname, 'index.html'), // Ensure this points to index.html correctly
         background: resolve(__dirname, 'src/background.js'),
         content: resolve(__dirname, 'src/content.js'),
       },
@@ -18,16 +19,13 @@ export default defineConfig({
           chunk.name === 'background' || chunk.name === 'content' ? '[name].js' : 'assets/[name].js',
       },
     },
-    outDir: 'dist',  // Ensure the build output is placed in the 'dist' directory
+    outDir: 'dist', // Ensure the build output is placed in the 'dist' directory
   },
   
-  // Use the buildEnd hook to copy the manifest.json file after the build
+  // Copy manifest file to the dist directory after build
   buildEnd() {
-    // Define the source and destination paths for the manifest file
     const manifestSrc = path.resolve(__dirname, 'manifest.json');
     const manifestDest = path.resolve(__dirname, 'dist/manifest.json');
-    
-    // Check if the manifest file exists and copy it to the 'dist' folder
     if (fs.existsSync(manifestSrc)) {
       fs.copyFileSync(manifestSrc, manifestDest);
       console.log('Manifest file copied to dist folder');
