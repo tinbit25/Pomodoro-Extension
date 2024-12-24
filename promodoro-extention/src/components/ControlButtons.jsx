@@ -40,8 +40,8 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="p-6 rounded-lg shadow-lg bg-white">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80">
+      <div className="p-6 rounded-lg shadow-lg bg-gray-800 text-white">
         <h2 className="text-2xl font-bold mb-4">Settings</h2>
         {updatedTabs.map((tab, index) => (
           <div key={tab.value} className="mb-4">
@@ -52,14 +52,14 @@ const SettingsModal = ({ tabsData, onSave, onClose }) => {
               type="number"
               value={tab.duration}
               onChange={(e) => handleChange(index, "duration", e.target.value)}
-              className="w-full mt-1 p-2 border rounded-full"
+              className="w-full mt-1 p-2 border rounded-full bg-gray-700 text-white"
             />
           </div>
         ))}
         <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-gray-500"
+            className="px-4 py-2 rounded-full bg-gray-600 text-white hover:bg-gray-500"
           >
             Cancel
           </button>

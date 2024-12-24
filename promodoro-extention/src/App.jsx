@@ -54,9 +54,9 @@ const App = () => {
 
   return (
     <div
-      className={`${
-        isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-black"
-      } w-96 h-full flex flex-col rounded-xl transition-colors duration-300`}
+      className={`w-96 h-full flex flex-col rounded-xl transition-colors duration-300 ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+      }`}
     >
       {/* Header */}
       <Header
@@ -65,13 +65,18 @@ const App = () => {
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
       />
-
+  
       {/* Main content */}
       <main className="flex-1 p-4">
         <Routes>
           <Route
             path="/"
-            element={<Home handleSessionComplete={handleSessionComplete} />}
+            element={
+              <Home
+                isDarkMode={isDarkMode}
+                handleSessionComplete={handleSessionComplete}
+              />
+            }
           />
           <Route
             path="/signup"
