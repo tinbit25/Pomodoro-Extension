@@ -1,19 +1,11 @@
 const crypto = require('crypto');
 const bcryptjs = require('bcryptjs');
 const User = require('../models/userModel');
-const { generateTokenAndSetCookie, sendWelcomeEmail, sendPasswordResetEmail } = require('../mailtrap/emails');
+const { generateTokenAndSetCookie, sendWelcomeEmail, sendPasswordResetEmail,sendResetSuccessEmail } = require('../mailtrap/emails');
 
 
-// Helper function to add session history
-const addSessionHistory = async (user, step) => {
-    try {
-        const sessionId = user.session.sessionId || crypto.randomBytes(20).toString('hex');
-        user.sessionHistory.push({ step, sessionId, completedAt: Date.now() });
-        await user.save();
-    } catch (error) {
-        console.error("Error adding session history:", error);
-    }
-};
+
+
 
 // Signup function
 exports.signup = async (req, res) => {
@@ -39,6 +31,10 @@ exports.signup = async (req, res) => {
         });
 
         await user.save();
+
+        // Send welcome email after user is created
+        await sendWelcomeEmail(user.email);
+
         res.status(201).json({
             success: true,
             message: "User created successfully",
@@ -105,68 +101,85 @@ exports.logout = async (req, res) => {
 };
 
 // Forgot password function
-exports.forgotPassword = async (req, res) => {
-    const { email } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ success: false, message: "User not found" });
-        }
-
-        if (user.status !== 'active') {
-            return res.status(403).json({ success: false, message: 'User account is not active' });
-        }
-
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpiredAt = Date.now() + 1 * 60 * 60 * 1000;
-        await user.save();
-
-        await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
-        
-        // Add session history for forgot password
-        await addSessionHistory(user, 'forgotPassword');
-
-        res.status(200).json({
-            success: true,
-            message: "Password reset link sent to your email"
-        });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
-
-// Reset password function
-exports.resetPassword = async (req, res) => {
-    const { token } = req.params;
-    const { password } = req.body;
-
-    try {
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpiredAt: { $gt: Date.now() },  // Ensure token is still valid
-        });
-
-        if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
-        }
-
-        const hashedPassword = await bcryptjs.hash(password, 10);
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpiredAt = undefined;
-
-        await user.save();
-        res.status(200).json({
-            success: true,
-            message: 'Password updated successfully'
-        });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
-
+exports.forgotPassword=async(req,res)=>{
+    const {email}=req.body
+     try {
+         const user=await User.findOne({email})
+         if (!user) {
+             return res.status(400).json({
+                 success: false,
+                 message: "User not found"
+             });
+         }
+ 
+ //Gnerate reset token
+ const resetToken=crypto.randomBytes(20).toString('hex')
+     const resetTokenExpiredAt=Date.now()+1*60*60*1000;
+    user.resetPasswordToken=resetToken
+    user.resetPasswordExpiredAt=resetTokenExpiredAt
+    await user.save()
+ 
+    await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+    res.status(200).json({
+     success: true,
+     message: "password reset link sent to your email"
+ });
+     } catch (error) {
+         console.log("Error in forgot Password",error)
+         res.status(400).json({
+             success: false,
+             message: error.message
+         });    
+     }
+ }
+ 
+ exports.resetPassword = async (req, res) => {
+     try {
+       const { token } = req.params; 
+       const { password } = req.body; 
+   
+       
+       const user = await User.findOne({
+         resetPasswordToken: token,
+         resetPasswordExpiredAt: { $gt: Date.now() }, 
+       });
+   
+       
+       if (!user) {
+         return res.status(400).json({
+           success: false,
+           message: "Invalid or expired reset token",
+         });
+       }
+   
+     
+       const hashedPassword = await bcryptjs.hash(password, 10);
+       
+       
+       user.password = hashedPassword;
+       user.resetPasswordToken = undefined;
+       user.resetPasswordExpiredAt = undefined;
+   
+       
+       await user.save();
+   
+       await sendResetSuccessEmail(user.email);
+ 
+       res.status(200).json({
+         success: true,
+         message: "Password reset successfully",
+       });
+     } catch (error) {
+       
+       console.log("Error in resetPassword:", error.message);
+   
+     
+       res.status(400).json({
+         success: false,
+         message: error.message,
+       });
+     }
+   };
 // Update Pomodoro status after a completed cycle
 exports.updatePomodoroStatus = async (user, completionTime, focusTime, shortBreak, longBreak) => {
     try {

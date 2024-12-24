@@ -1,5 +1,5 @@
 const { sender, sgMail } = require('./mailtra.config');
-const { PASSWORD_RESET_SUCCESS_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE, PASSWORD_RESET_REQUEST_TEMPLATE } = require("./emailTemplates");
+const { PASSWORD_RESET_SUCCESS_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE } = require("./emailTemplates");
 
 
 const sendWelcomeEmail = async (email, name) => {
@@ -74,15 +74,13 @@ const sendWelcomeEmail = async (email, name) => {
 
 const sendPasswordResetEmail = async (email, resetURL) => {
   try {
-    console.log("Sending password reset email to:", email);
-
+    console.log("Sending password reset email to:", email); // Add more logs for debugging
     const msg = {
       to: email,
       from: sender.address,
       subject: "Reset Your Password",
       html: PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL),
     };
-
     const response = await sgMail.send(msg);
     console.log("Password reset email sent successfully", response);
   } catch (error) {

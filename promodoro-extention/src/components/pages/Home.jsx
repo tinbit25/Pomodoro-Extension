@@ -7,13 +7,13 @@ import SettingsModal from "../SettingsModal";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 
-const Home = ({ handleSessionComplete }) => {
+const Home = ({ userId }) => {
   const [tabsData, setTabsData] = useState([
     { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
     { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
     { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
   ]);
-  
+
   const [cycleCount, setCycleCount] = useState(0); // Tracks completed cycles
   const [activeTabIndex, setActiveTabIndex] = useState(0); // Tracks the current tab (Focus, Break, Long Break)
   const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration); // Tracks time left in the current session
@@ -21,14 +21,12 @@ const Home = ({ handleSessionComplete }) => {
   const [resetSignal, setResetSignal] = useState(false); // Used to force a reset on the timer
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Tracks whether settings modal is open
 
-  // Request notification permission on component mount
   useEffect(() => {
     if (Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
 
-  // Notify function for browser notifications
   const notify = (message) => {
     if (Notification.permission === "granted") {
       new Notification("Pomodoro Timer", {
@@ -38,17 +36,14 @@ const Home = ({ handleSessionComplete }) => {
     }
   };
 
-  // Handle start/pause button
   const handleStartPause = () => setIsRunning((prev) => !prev);
 
-  // Handle timer restart
   const handleRestart = () => {
     setIsRunning(false);
     setTimeLeft(tabsData[activeTabIndex]?.duration || 0);
     setResetSignal((prev) => !prev);
   };
 
-  // Handle next session (focus-time, short break, long break)
   const handleNextSession = () => {
     setIsRunning(false);
 
@@ -56,20 +51,18 @@ const Home = ({ handleSessionComplete }) => {
       activeTabIndex === 0
         ? cycleCount < 3
           ? 1
-          : 2 // Short Break for first 3 cycles, Long Break for last
+          : 2
         : activeTabIndex === 1
         ? 0
-        : 1; // Reset to Focus-time after Short Break or Long Break
+        : 1;
 
     setActiveTabIndex(nextIndex);
     setTimeLeft(tabsData[nextIndex]?.duration || 0);
 
-    // Reset cycle count after Long Break
     if (nextIndex === 2) {
       setCycleCount(0);
     }
 
-    // Update cycle count after Short Break
     if (activeTabIndex === 1) {
       setCycleCount((prev) => prev + 1);
     }
@@ -77,73 +70,64 @@ const Home = ({ handleSessionComplete }) => {
     setResetSignal((prev) => !prev);
   };
 
-  // Handle session completion and send data to parent
   const handleComplete = () => {
     const tab = tabsData[activeTabIndex];
-    const completionTime = new Date().toLocaleString();
+    const completionTime = new Date().toISOString();
 
-    if (typeof handleSessionComplete === "function") {
-      handleSessionComplete({
-        tab: tab.value,
-        completionTime,
-        status: "Completed",
-      });
-    } else {
-      console.error("handleSessionComplete is not defined or is not a function");
-    }
+    const sessionData = {
+        userId: userId || "unknown",
+        tab: tab.value || "unknown",
+        completionTime: completionTime || new Date().toISOString(),
+        cycleCount: cycleCount + (activeTabIndex === 1 ? 1 : 0),
+        focusTime: tabsData[0]?.duration || 0,
+        shortBreak: tabsData[1]?.duration || 0,
+        longBreak: tabsData[2]?.duration || 0,
+    };
+
+    saveSessionData(sessionData); // Data saved without toast
 
     notify(`Session "${tab.label}" completed!`);
 
-    // Special notification after completing Pomodoro or Long Break
+    // Refresh page after a complete Pomodoro cycle or long break
     if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
-      toast.success("Congratulations! You completed one full Pomodoro cycle!");
-      setCycleCount(0); // Reset cycle count for next round
-
-      // Store data and refresh the page after cycle completion
-      saveCycleData(true); // Store cycle completion data
-      setTimeout(() => window.location.reload(), 2000); // Delay before page reload
+      setCycleCount(0);
+      toast.success("Pomodoro cycle completed! Refreshing...");
+      setTimeout(() => window.location.reload(), 5000); // Refresh after 2 seconds
     } else if (activeTabIndex === 2) {
-      toast.info("Great! You've completed your long break!");
+      toast.success("Pomodoro cycle completed! Refreshing...");
+      setTimeout(() => window.location.reload(), 5000); // Refresh after long break
     } else {
-      handleNextSession(); // Proceed to the next session
+      handleNextSession();
     }
   };
 
-  // Store cycle completion data in the database (backend)
-  const saveCycleData = async (completed) => {
+  const saveSessionData = async (sessionData) => {
     try {
-      const response = await fetch("/api/storeCycleData", {
+      const response = await fetch("http://localhost:5000/api/sessions/saveSessionData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ completed, timestamp: new Date().toISOString() }),
+        body: JSON.stringify(sessionData),
       });
       const result = await response.json();
-      if (response.ok) {
-        toast.success("Cycle data stored successfully!");
-      } else {
-        toast.error("Failed to store cycle data.");
-      }
+      // No toast notifications here for success/failure
     } catch (error) {
-      console.error("Error saving cycle data:", error);
-      toast.error("Error saving cycle data.");
+      console.error("Error saving session data:", error);
     }
   };
 
-  // Layout effect for preventing layout shifts when settings modal is open
   useLayoutEffect(() => {
     document.body.style.overflow = isSettingsOpen ? "hidden" : "auto";
   }, [isSettingsOpen]);
 
-  // Timer logic: decrement time and trigger completion when time is up
   useEffect(() => {
     if (!isRunning) return;
 
     if (timeLeft === 0) {
-      const sound = new Audio("/audio.mp3"); // Make sure the path is correct
+      const sound = new Audio("/audio.mp3");
       sound.play();
-      handleComplete(); // Trigger completion when time hits zero
+      handleComplete();
       return;
     }
 
@@ -151,10 +135,9 @@ const Home = ({ handleSessionComplete }) => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
 
-    return () => clearInterval(timer); // Cleanup interval on component unmount or re-run
+    return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
-  // Handle tab change
   const handleTabChange = (value) => {
     const index = tabsData.findIndex((tab) => tab.value === value);
     setActiveTabIndex(index);
@@ -163,7 +146,6 @@ const Home = ({ handleSessionComplete }) => {
     setResetSignal((prev) => !prev);
   };
 
-  // Handle saving updated settings
   const handleSaveSettings = (updatedTabs) => {
     setTabsData(updatedTabs);
     const updatedTab = updatedTabs[activeTabIndex];
@@ -171,14 +153,12 @@ const Home = ({ handleSessionComplete }) => {
     setIsSettingsOpen(false);
   };
 
-  // Format time for display (e.g., 25:00)
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60).toString().padStart(2, "0");
     const seconds = (time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
 
-  // Format session progress (e.g., 1/4, 2/4, etc.)
   const formatSessionProgress = () => {
     return `${cycleCount + 1}/4`;
   };
@@ -195,7 +175,6 @@ const Home = ({ handleSessionComplete }) => {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex space-x-6 mb-8 justify-center">
           {tabsData.map((tab) => (
             <TabButton
@@ -207,19 +186,16 @@ const Home = ({ handleSessionComplete }) => {
           ))}
         </div>
 
-        {/* Timer */}
         <TimeCircle
           duration={formatTime(timeLeft)}
           isRunning={isRunning}
           resetSignal={resetSignal}
         />
 
-        {/* Session Progress */}
         <div className="mt-4 text-xl">
           <span>Session {formatSessionProgress()}</span>
         </div>
 
-        {/* Controls */}
         <ControlButtons
           isRunning={isRunning}
           handleStartPause={handleStartPause}
@@ -228,7 +204,6 @@ const Home = ({ handleSessionComplete }) => {
         />
       </div>
 
-      {/* Settings Modal */}
       {isSettingsOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -241,7 +216,6 @@ const Home = ({ handleSessionComplete }) => {
         </div>
       )}
 
-      {/* Toast Notifications */}
       <ToastContainer />
     </div>
   );
