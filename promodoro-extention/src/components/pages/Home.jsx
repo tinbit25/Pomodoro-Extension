@@ -4,22 +4,26 @@ import TimeCircle from "../TimeCircle";
 import ControlButtons from "../ControlButtons";
 import { FaCog } from "react-icons/fa";
 import SettingsModal from "../SettingsModal";
-import { toast, ToastContainer } from "react-toastify"; 
-import "react-toastify/dist/ReactToastify.css"; 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const Home = ({ userId }) => {
+
+const Home = ({ handleSessionComplete, isDarkMode }) => {
+
   const [tabsData, setTabsData] = useState([
-    { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
-    { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
-    { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
+    { label: "Focus-time", value: "focus-time", duration: 1500 },
+    { label: "Short Break", value: "short-break", duration: 300 },
+    { label: "Long Break", value: "long-break", duration: 900 },
   ]);
 
-  const [cycleCount, setCycleCount] = useState(0); // Tracks completed cycles
-  const [activeTabIndex, setActiveTabIndex] = useState(0); // Tracks the current tab (Focus, Break, Long Break)
-  const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration); // Tracks time left in the current session
-  const [isRunning, setIsRunning] = useState(false); // Tracks if the timer is running
-  const [resetSignal, setResetSignal] = useState(false); // Used to force a reset on the timer
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Tracks whether settings modal is open
+
+  const [cycleCount, setCycleCount] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration);
+  const [isRunning, setIsRunning] = useState(false);
+  const [resetSignal, setResetSignal] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
 
   useEffect(() => {
     if (Notification.permission === "default") {
@@ -35,6 +39,7 @@ const Home = ({ userId }) => {
       });
     }
   };
+
 
   const handleStartPause = () => setIsRunning((prev) => !prev);
 
@@ -86,7 +91,7 @@ const Home = ({ userId }) => {
 
     saveSessionData(sessionData); // Data saved without toast
 
-    notify(`Session "${tab.label}" completed!`);
+  notify(`Session "${tab.label}" completed!`);
 
     // Refresh page after a complete Pomodoro cycle or long break
     if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
@@ -117,6 +122,7 @@ const Home = ({ userId }) => {
     }
   };
 
+
   useLayoutEffect(() => {
     document.body.style.overflow = isSettingsOpen ? "hidden" : "auto";
   }, [isSettingsOpen]);
@@ -146,6 +152,7 @@ const Home = ({ userId }) => {
     setResetSignal((prev) => !prev);
   };
 
+
   const handleSaveSettings = (updatedTabs) => {
     setTabsData(updatedTabs);
     const updatedTab = updatedTabs[activeTabIndex];
@@ -159,13 +166,21 @@ const Home = ({ userId }) => {
     return `${minutes}:${seconds}`;
   };
 
+
   const formatSessionProgress = () => {
     return `${cycleCount + 1}/4`;
   };
 
+
   return (
-    <div className="w-full flex flex-col justify-center items-center min-h-screen">
-      <div className="w-full max-w-full p-8 rounded-lg shadow-lg relative">
+    <>
+      <div
+        className={`w-full max-w-full p-8 rounded-lg ${
+          isDarkMode
+            ? "bg-blue-950 text-white shadow-xl shadow-blue-900"
+            : "bg-slate-200 text-black shadow-lg shadow-gray-400"
+        } relative`}
+      >
         <div className="flex justify-end">
           <button
             className="text-2xl p-2 rounded-full"
@@ -209,7 +224,10 @@ const Home = ({ userId }) => {
           <div className="modal-content">
             <SettingsModal
               tabsData={tabsData}
-              onSave={handleSaveSettings}
+              onSave={(updatedTabs) => {
+                setTabsData(updatedTabs);
+                setIsSettingsOpen(false);
+              }}
               onClose={() => setIsSettingsOpen(false)}
             />
           </div>
@@ -217,7 +235,7 @@ const Home = ({ userId }) => {
       )}
 
       <ToastContainer />
-    </div>
+    </>
   );
 };
 
