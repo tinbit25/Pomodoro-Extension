@@ -32,7 +32,8 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
 
     // Navigate to the corresponding page based on the menu item
     if (item === "Logout") {
-      handleLogout(); // Perform logout logic
+      handleLogout(); 
+      navigate("/login");
     } else if (item === "Profile") {
       navigate("/profile"); // Navigate to the Profile page
     } else if (item === "States") {
@@ -41,7 +42,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
   };
 
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b">
+    <header className="z-10 flex items-center justify-between px-4 py-2 border-b">
       <h1 className="text-xl font-bold">
         <Link to="/">Pomodoro Timer</Link>
       </h1>

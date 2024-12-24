@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const connectDB = require('./db/connectDB');
+const sessionRoutes = require('./routes/sessionRoutes');
 require('dotenv').config();
 
 // Import routes
@@ -21,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // API routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/sessions', sessionRoutes);
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {
     // Set static folder to the build folder

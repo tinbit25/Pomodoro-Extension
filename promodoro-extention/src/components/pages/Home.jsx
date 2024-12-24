@@ -4,8 +4,8 @@ import TimeCircle from "../TimeCircle";
 import ControlButtons from "../ControlButtons";
 import { FaCog } from "react-icons/fa";
 import SettingsModal from "../SettingsModal";
-import { toast, ToastContainer } from "react-toastify"; // Import toastify
-import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 const Home = ({ handleSessionComplete }) => {
   const [tabsData, setTabsData] = useState([
@@ -78,38 +78,21 @@ const Home = ({ handleSessionComplete }) => {
   };
 
   // Handle session completion and send data to parent
-  const handleComplete = async () => {
+  const handleComplete = () => {
     const tab = tabsData[activeTabIndex];
     const completionTime = new Date().toLocaleString();
 
-    // API request to save session data
-    try {
-        const response = await fetch('/api/auth/save-session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                tab: tab.value,
-                completionTime,
-                status: 'Completed',
-            }),
-        });
-
-        if (response.ok) {
-            console.log('Session saved successfully');
-        } else {
-            console.error('Error saving session');
-        }
-    } catch (error) {
-        console.error('Error:', error);
+    if (typeof handleSessionComplete === "function") {
+      handleSessionComplete({
+        tab: tab.value,
+        completionTime,
+        status: "Completed",
+      });
+    } else {
+      console.error("handleSessionComplete is not defined or is not a function");
     }
 
-    // Notify the user about the completion
     notify(`Session "${tab.label}" completed!`);
-
-    // Handle the rest of the logic...
-};
 
     // Special notification after completing Pomodoro or Long Break
     if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
