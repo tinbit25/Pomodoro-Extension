@@ -80,7 +80,7 @@ const StatusPage = () => {
         {Object.keys(aggregatedTotals).map((purpose) => (
           <div
             key={purpose}
-            className="bg-gray-100 p-4 rounded shadow"
+            className="bg-gray-95 p-4 rounded shadow"
           >
             <h3 className="text-lg font-bold mb-2">{purpose}</h3>
             <p>Focus Time: {formatTime(aggregatedTotals[purpose].focusTime)}</p>
