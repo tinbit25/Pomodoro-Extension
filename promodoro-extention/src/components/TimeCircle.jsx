@@ -36,14 +36,17 @@ const TimeCircle = ({ duration, isRunning, resetSignal, isDarkMode }) => {
       }}
     >
       <span
-        className="font-bold text-5xl"
-        style={{
-          color: isDarkMode ? "white" : isRunning ? "#1e40af" : "#334155", 
-          transition: "color 0.3s ease-in-out",
-        }}
-      >
-        {formatTime(timeLeft)}
-      </span>
+  className={`font-bold text-5xl transition-colors duration-300 ease-in-out ${
+    isDarkMode
+      ? "text-white"
+      : isRunning
+      ? "text-green-300" 
+      : "text-green-300" // Replace "#334155" with equivalent Tailwind class
+  }`}
+>
+  {formatTime(timeLeft)}
+</span>
+
     </div>
   );
 };

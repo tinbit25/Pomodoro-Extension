@@ -78,8 +78,8 @@ const Home = ({ userId, isDarkMode }) => {
 
   const handleComplete = () => {
     const tab = tabsData[activeTabIndex];
-    const completionTime = new Date().toISOString();
-  
+    const completionTime = new Date().toISOString(); 
+
     // Update total time spent based on the active tab
     if (activeTabIndex === 0) {
       setTotalFocusTime((prev) => prev + tabsData[0].duration); // Add focus time
@@ -88,35 +88,43 @@ const Home = ({ userId, isDarkMode }) => {
     } else if (activeTabIndex === 2) {
       setTotalLongBreakTime((prev) => prev + tabsData[2].duration); // Add long break time
     }
-  
+
     const sessionData = {
-      userId: userId,
-      tab: purpose || "General",
+      userId: userId, 
+      tab : purpose||"General", 
       focusTime: totalFocusTime + (activeTabIndex === 0 ? tabsData[0].duration : 0),
       shortBreak: totalShortBreakTime + (activeTabIndex === 1 ? tabsData[1].duration : 0),
       longBreak: totalLongBreakTime + (activeTabIndex === 2 ? tabsData[2].duration : 0),
       cycleCount: cycleCount + (activeTabIndex === 1 ? 1 : 0),
       completionTime: completionTime,
     };
-  
+
     console.log("Session Data to be sent:", sessionData);
     saveSessionData(sessionData); // Save session data
-  
+
     notify(`Session "${tab.label}" completed!`);
-  
-    // Reset for a new Pomodoro cycle
-    if (activeTabIndex === 2 && cycleCount === 3) {
-      toast.success("Pomodoro cycle completed! Starting a new cycle...");
-      setActiveTabIndex(0); // Reset to focus time
-      setTimeLeft(tabsData[0]?.duration || 0);
+
+    // Refresh page after a complete Pomodoro cycle or long break
+    if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
       setCycleCount(0);
-      setIsRunning(false);
-      setResetSignal((prev) => !prev);
+      toast.success("Pomodoro cycle completed! Resetting...");
+      setTimeout(() => resetAppState(), 5000);
+    } else if (activeTabIndex === 2) {
+      toast.success("Pomodoro cycle completed! Resetting...");
+      setTimeout(() => resetAppState(), 5000);
     } else {
       handleNextSession();
     }
+    
+    // Function to reset the application state
+    function resetAppState() {
+      setActiveTabIndex(0); // Reset to the first tab
+      setCycleCount(0); // Reset cycle count
+      
+    }
+    
   };
-  
+
   const saveSessionData = async (sessionData) => {
     try {
       const response = await fetch("http://localhost:5000/api/sessions/saveSessionData", {

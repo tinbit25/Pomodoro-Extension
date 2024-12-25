@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../../public/icon1.png";
 
-const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) => {
+const Header = ({
+  isDarkMode,
+  toggleTheme,
+  isLoggedIn,
+  onLogout,
+  userProfile,
+}) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
 
@@ -19,6 +25,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
         console.log(data.message); 
         
         navigate("/login");
+        onLogout(); 
       } else {
         console.error(data.message); 
       }
@@ -30,12 +37,9 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
   const handleProfileMenuItemClick = (item) => {
     setShowProfileMenu(false); 
 
-    
     if (item === "Logout") {
       handleLogout();
-      navigate("/login");
-    } else if (item === "Profile") {
-      navigate("/profile"); 
+    
     } else if (item === "Status") {
       navigate("/status"); 
     }
@@ -45,7 +49,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
     <header className="z-10 flex items-center justify-between px-4 py-2 border-b">
       <h1 className="text-xl font-bold">
         <Link className="flex" to="/">
-          <img className="rounded-full" src={logo} />
+          <img className="rounded-full" src={logo} alt="Pomodoro Timer Logo" />
           <h6 className="pt-2">Pomodoro Timer</h6>
         </Link>
       </h1>
