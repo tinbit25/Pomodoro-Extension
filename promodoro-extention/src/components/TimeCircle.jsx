@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const TimeCircle = ({ duration, isRunning, resetSignal }) => {
+const TimeCircle = ({ duration, isRunning, resetSignal, isDarkMode }) => {
   const [timeLeft, setTimeLeft] = useState(() => safeParseDurationToSeconds(duration));
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const TimeCircle = ({ duration, isRunning, resetSignal }) => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  const circleSize = "250px"; // Slightly larger for a better look
+  const circleSize = "250px"; 
 
   return (
     <div
@@ -36,9 +36,9 @@ const TimeCircle = ({ duration, isRunning, resetSignal }) => {
       }}
     >
       <span
-        className="font-bold text-5xl text-gray-800"
+        className="font-bold text-5xl"
         style={{
-          color: isRunning ? "#1e40af" : "#334155", // Text color based on state
+          color: isDarkMode ? "white" : isRunning ? "#1e40af" : "#334155", 
           transition: "color 0.3s ease-in-out",
         }}
       >
@@ -50,7 +50,7 @@ const TimeCircle = ({ duration, isRunning, resetSignal }) => {
 
 const safeParseDurationToSeconds = (duration) => {
   if (typeof duration === "number") {
-    return duration; // Return the value directly if already in seconds
+    return duration; 
   }
 
   if (typeof duration === "string" && duration.includes(":")) {
@@ -61,7 +61,7 @@ const safeParseDurationToSeconds = (duration) => {
   }
 
   console.warn("Invalid duration format, falling back to default 0 seconds.");
-  return 0; // Fallback value
+  return 0; 
 };
 
 const formatTime = (seconds) => {

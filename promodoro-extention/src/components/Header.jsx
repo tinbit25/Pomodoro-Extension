@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate,Link } from "react-router-dom";
-
+import logo from "../../public/icon1.png"
 const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
@@ -44,11 +44,11 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
   return (
     <header className="z-10 flex items-center justify-between px-4 py-2 border-b">
       <h1 className="text-xl font-bold">
-        <Link to="/">Pomodoro Timer</Link>
+        <Link className="flex" to="/"><img className="rounded-full" src={logo}/><h6 className="pt-2">Pomodoro Timer</h6></Link>
       </h1>
       <div className="flex items-center space-x-4">
         <button
-          className={`px-3 py-1 rounded ${
+          className={`px-3 py-1 bg-transparent text-2xl ${
             isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200"
           }`}
           onClick={toggleTheme}
@@ -57,7 +57,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
         </button>
         {isLoggedIn ? (
           <div className="relative">
-            {/* Profile Section */}
+           
             <button
               onClick={() => setShowProfileMenu((prev) => !prev)}
               className="rounded-full w-10 h-10 overflow-hidden border border-gray-300 dark:border-gray-600"
@@ -73,7 +73,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
             {/* Dropdown Menu */}
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg shadow-lg py-2 w-48">
-                {["Profile", "States", "Logout"].map((item) => (
+                {["Status", "Logout"].map((item) => (
                   <button
                     key={item}
                     onClick={() => handleProfileMenuItemClick(item)}

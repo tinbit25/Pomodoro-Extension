@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Input from '../Input';  // Assuming your Input component is in this path
+import Input from '../components/Input';  // Assuming your Input component is in this path
 import { Loader } from 'lucide-react';
 
 const ResetPassword = () => {

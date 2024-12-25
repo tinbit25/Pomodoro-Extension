@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader, UserPlus ,Mail,Lock} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import Input from "../Input";
+import Input from "../components/Input";
 
 const Signup = ({ onSignupSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);

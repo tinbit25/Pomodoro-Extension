@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-import TabButton from "../TabButton";
-import TimeCircle from "../TimeCircle";
-import ControlButtons from "../ControlButtons";
+import TabButton from "../components/TabButton";
+import TimeCircle from "../components/TimeCircle";
+import ControlButtons from "../components/ControlButtons";
 import { FaCog } from "react-icons/fa";
-import SettingsModal from "../SettingsModal";
+import SettingsModal from "../components/SettingsModal";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 
@@ -198,8 +198,8 @@ const Home = ({ userId,isDarkMode  }) => {
           resetSignal={resetSignal}
         />
 
-        <div className="mt-4 text-xl">
-          <span>Session {formatSessionProgress()}</span>
+        <div className=" ml-10 font-mono mt-4 text-xl">
+          <span>Completed Session {formatSessionProgress()}</span>
         </div>
 
         <ControlButtons

@@ -1,4 +1,4 @@
-// components/TabButton.js
+
 import React from "react";
 
 const TabButton = ({ tab, activeTab, setActiveTab }) => (

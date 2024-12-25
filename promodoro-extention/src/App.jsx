@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
-import Home from "./components/pages/Home";
-import Status from "./components/pages/StatusPage";
-import Login from "./components/pages/Login";
-import Signup from "./components/pages/Signup";
-import ForgotPassword from "./components/pages/ForgotPassword";
-import Logout from "./components/pages/Logout";
-import ResetPassword from "./components/pages/ResetPassword";
-import Profile from "./components/pages/Profile";
+import Home from "./pages/Home";
+import Status from "./pages/StatusPage";
+import Login from "./pages/Login";
+import Signup from ".//pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import Logout from "./pages/Logout";
+import ResetPassword from "./pages/ResetPassword";
+
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -88,7 +88,6 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/logout" element={<Logout />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/status" element={<Status sessionData={sessionData} />} />
         </Routes>
       </main>

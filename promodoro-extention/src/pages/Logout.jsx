@@ -8,9 +8,7 @@ const Logout = () => {
     // Clear the token (or other authentication data)
     localStorage.removeItem("token");
 
-    // Optionally clear cookies if you are using them for authentication
-    // document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-
+    
     // Redirect to login page
     navigate("/login");
   }, [navigate]);

@@ -14,7 +14,7 @@ const SettingsModal = ({ tabsData, onSave, onClose, isDarkMode }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 pr-72">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 ">
       <div
         className={`p-6 rounded-lg shadow-lg ${
           isDarkMode

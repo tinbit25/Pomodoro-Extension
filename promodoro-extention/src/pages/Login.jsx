@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader, Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
-import Input from "../Input";
+import Input from "../components/Input";
 
 const Login = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,7 @@ const Login = ({ onLoginSuccess }) => {
         localStorage.setItem("user", JSON.stringify(data.user)); // User data
         localStorage.setItem("token", data.token); // JWT token
 
-        onLoginSuccess(); // Update login state
+        onLoginSuccess(); 
       } else {
         setError(data.message || "Invalid credentials.");
       }
