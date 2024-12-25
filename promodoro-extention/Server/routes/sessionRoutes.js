@@ -1,7 +1,7 @@
 const express = require('express');
 const Session = require('../models/Session');
 const router = express.Router();
-
+const User = require('../models/userModel'); 
 // Save session data (without token-based auth)
 router.post('/saveSessionData', async (req, res) => {
   const { userId, tab, focusTime, shortBreak, longBreak, cycleCount } = req.body;
@@ -11,16 +11,15 @@ router.post('/saveSessionData', async (req, res) => {
   }
 
   try {
-    const newSession = new Session({
-      userId,
-      tab,
-      focusTime,
-      shortBreak,
-      longBreak,
-      cycleCount,
-    });
+    // Validate userId exists
+    const userExists = await User.findById(userId);
+    if (!userExists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
+    const newSession = new Session({ userId, tab, focusTime, shortBreak, longBreak, cycleCount });
     await newSession.save();
+
     res.status(201).json({ success: true, message: 'Session data saved successfully', data: newSession });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error saving session data', error: error.message });
@@ -28,7 +27,7 @@ router.post('/saveSessionData', async (req, res) => {
 });
 
 // Get session history for a user (without token-based auth)
-router.get('/history/:Id', async (req, res) => {
+router.get('/history', async (req, res) => {
   const { userId } = req.query;
 
   if (!userId) {

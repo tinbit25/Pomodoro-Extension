@@ -47,8 +47,7 @@ const App = () => {
 
   // Handle session complete (update session data)
   const handleSessionComplete = (sessionDetails) => {
-    // Update session data (this could be stored in a database or displayed on the status page)
-    setSessionData(sessionDetails);
+    setSessionData(sessionDetails); // Set session data here
     console.log("Session Completed: ", sessionDetails);
   };
 
@@ -74,7 +73,7 @@ const App = () => {
             element={
               <Home
                 isDarkMode={isDarkMode}
-                handleSessionComplete={handleSessionComplete}
+                handleSessionComplete={handleSessionComplete} // Pass this function properly
               />
             }
           />

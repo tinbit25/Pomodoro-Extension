@@ -30,7 +30,7 @@ const sessionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt
+}, { timestamps: true }); 
 
 const Session = mongoose.model('Session', sessionSchema);
 module.exports = Session;
