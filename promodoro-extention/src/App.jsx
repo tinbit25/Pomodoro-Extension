@@ -4,13 +4,13 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Status from "./pages/StatusPage";
 import Login from "./pages/Login";
-import Signup from ".//pages/Signup";
+import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Logout from "./pages/Logout";
 import ResetPassword from "./pages/ResetPassword";
 
-
 const App = () => {
+  const [userId, setUserId] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [sessionData, setSessionData] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,17 +19,23 @@ const App = () => {
   // Toggle theme (dark mode)
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
-  // Check login status when the app loads
+  // Check login status and user ID when the app loads
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true); // Set user as logged in if token exists
     }
+
+    const storedUserId = localStorage.getItem("userId"); // Retrieve userId from local storage
+    console.log("User  ID from local storage:", storedUserId); // Log the userId
+    setUserId(storedUserId); // Set the userId state
   }, []);
 
   // Handle login success and redirect
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (userData) => {
     setIsLoggedIn(true);
+    localStorage.setItem("userId", userData._id); // Store userId in local storage
+    setUserId(userData._id); // Update userId state immediately
     navigate("/"); // Redirect to home page after login
   };
 
@@ -42,6 +48,8 @@ const App = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("token"); // Remove token from local storage
+    localStorage.removeItem("userId"); // Remove userId from local storage
+    setUserId(null); // Reset userId state
     navigate("/login"); // Redirect to login page after logout
   };
 
@@ -64,7 +72,7 @@ const App = () => {
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
       />
-  
+
       {/* Main content */}
       <main className="flex-1 p-4">
         <Routes>
@@ -73,7 +81,8 @@ const App = () => {
             element={
               <Home
                 isDarkMode={isDarkMode}
-                handleSessionComplete={handleSessionComplete} // Pass this function properly
+                handleSessionComplete={handleSessionComplete}
+                userId={userId} // Pass userId to Home
               />
             }
           />
@@ -85,7 +94,7 @@ const App = () => {
             path="/login"
             element={<Login onLoginSuccess={handleLoginSuccess} />}
           />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/forgot-password " element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/status" element={<Status sessionData={sessionData} />} />

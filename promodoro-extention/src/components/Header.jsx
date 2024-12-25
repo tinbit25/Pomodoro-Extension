@@ -1,50 +1,53 @@
 import React, { useState } from "react";
-import { useNavigate,Link } from "react-router-dom";
-import logo from "../../public/icon1.png"
+import { useNavigate, Link } from "react-router-dom";
+import logo from "../../public/icon1.png";
+
 const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-        const response = await fetch("http://localhost:5000/api/auth/logout", {
-            method: "POST",
-            credentials: "include", // Include credentials (cookies)
-        });
+      const response = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // Include credentials (cookies)
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-            console.log(data.message); // Logged out successfully
-            // Redirect to the login page or home page
-            navigate("/login");
-        } else {
-            console.error(data.message); // Handle error response
-        }
+      if (response.ok) {
+        console.log(data.message); // Logged out successfully
+        // Redirect to the login page or home page
+        navigate("/login");
+      } else {
+        console.error(data.message); // Handle error response
+      }
     } catch (error) {
-        console.error("An error occurred during logout:", error);
+      console.error("An error occurred during logout:", error);
     }
-};
-
+  };
 
   const handleProfileMenuItemClick = (item) => {
     setShowProfileMenu(false); // Close the profile menu after selection
 
     // Navigate to the corresponding page based on the menu item
     if (item === "Logout") {
-      handleLogout(); 
+      handleLogout();
       navigate("/login");
     } else if (item === "Profile") {
       navigate("/profile"); // Navigate to the Profile page
-    } else if (item === "States") {
-      navigate("/status"); // Navigate to the States page
+    } else if (item === "Status") {
+      navigate("/status"); // Navigate to the Status page, changed to /route
     }
   };
 
   return (
     <header className="z-10 flex items-center justify-between px-4 py-2 border-b">
       <h1 className="text-xl font-bold">
-        <Link className="flex" to="/"><img className="rounded-full" src={logo}/><h6 className="pt-2">Pomodoro Timer</h6></Link>
+        <Link className="flex" to="/">
+          <img className="rounded-full" src={logo} />
+          <h6 className="pt-2">Pomodoro Timer</h6>
+        </Link>
       </h1>
       <div className="flex items-center space-x-4">
         <button
@@ -57,7 +60,6 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
         </button>
         {isLoggedIn ? (
           <div className="relative">
-           
             <button
               onClick={() => setShowProfileMenu((prev) => !prev)}
               className="rounded-full w-10 h-10 overflow-hidden border border-gray-300 dark:border-gray-600"

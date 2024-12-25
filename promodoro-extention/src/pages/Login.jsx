@@ -20,13 +20,19 @@ const Login = ({ onLoginSuccess }) => {
       });
 
       const data = await response.json();
+      console.log("Login response data:", data); // Log the response data
 
       if (response.ok) {
         // Store user data and token in local storage
         localStorage.setItem("user", JSON.stringify(data.user)); // User data
         localStorage.setItem("token", data.token); // JWT token
-
-        onLoginSuccess(); 
+        localStorage.setItem("userId", data.user._id); // Store userId in local storage
+      
+        // Log the userId to verify it's being set correctly
+        console.log("User  ID stored in local storage:", data.user._id);
+      
+        // Pass user data to onLoginSuccess
+        onLoginSuccess(data.user); 
       } else {
         setError(data.message || "Invalid credentials.");
       }

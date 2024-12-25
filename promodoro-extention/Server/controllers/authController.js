@@ -5,8 +5,6 @@ const { generateTokenAndSetCookie, sendWelcomeEmail, sendPasswordResetEmail,send
 
 
 
-
-
 // Signup function
 exports.signup = async (req, res) => {
     const { name, email, password } = req.body;
@@ -46,6 +44,7 @@ exports.signup = async (req, res) => {
 };
 
 // Login function (no token)
+// Login function (no token)
 exports.login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -61,12 +60,7 @@ exports.login = async (req, res) => {
 
         // Check if the account is verified
         if (!user.isVerified) {
-            return res.status(403).json({ success: false, message: 'User account is not verified' });
-        }
-
-        // Check if the user's pomodoroStatus is active (if needed)
-        if (user.pomodoroStatus.status !== 'active') {
-            return res.status(403).json({ success: false, message: 'User account is not active in Pomodoro' });
+            return res.status(403).json({ success: false, message: 'User  account is not verified' });
         }
 
         const isMatch = await bcryptjs.compare(password, user.password);
@@ -80,15 +74,13 @@ exports.login = async (req, res) => {
             message: "Logged in successfully",
             user: { 
                 ...user._doc, 
-                password: undefined,
+                password: undefined, // Exclude password from response
             },
-            generateTokenAndSetCookie
         });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
 };
-
 
 // Logout function (no token-based auth)
 exports.logout = async (req, res) => {

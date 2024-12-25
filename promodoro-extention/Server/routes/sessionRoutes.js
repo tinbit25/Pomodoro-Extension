@@ -1,8 +1,12 @@
+
+// Save session data (without token-based auth)
 const express = require('express');
 const Session = require('../models/Session');
+const User = require('../models/userModel');
+const mongoose = require('mongoose'); // Import mongoose to use ObjectId
 const router = express.Router();
-const User = require('../models/userModel'); 
-// Save session data (without token-based auth)
+
+// Save session data
 router.post('/saveSessionData', async (req, res) => {
   const { userId, tab, focusTime, shortBreak, longBreak, cycleCount } = req.body;
 
@@ -11,36 +15,46 @@ router.post('/saveSessionData', async (req, res) => {
   }
 
   try {
+    // Convert userId to ObjectId
+    const userObjectId = new mongoose.Types.ObjectId(userId); // Use new keyword
+
     // Validate userId exists
-    const userExists = await User.findById(userId);
+    const userExists = await User.findById(userObjectId);
     if (!userExists) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User  not found' });
     }
 
-    const newSession = new Session({ userId, tab, focusTime, shortBreak, longBreak, cycleCount });
+    const newSession = new Session({ userId: userObjectId, tab, focusTime, shortBreak, longBreak, cycleCount });
     await newSession.save();
 
     res.status(201).json({ success: true, message: 'Session data saved successfully', data: newSession });
   } catch (error) {
+    console.error("Error saving session data:", error); // Log the error for debugging
     res.status(500).json({ success: false, message: 'Error saving session data', error: error.message });
   }
 });
 
-// Get session history for a user (without token-based auth)
+
 router.get('/history', async (req, res) => {
   const { userId } = req.query;
 
+  // Validate userId
   if (!userId) {
-    return res.status(400).json({ success: false, message: 'User ID is required' });
+    return res.status(400).json({ success: false, message: 'User  ID is required' });
   }
 
   try {
-    const sessions = await Session.find({ userId }).sort({ createdAt: -1 });
+    // Convert userId to ObjectId using 'new'
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Retrieve session history
+    const sessions = await Session.find({ userId: userObjectId }).sort({ createdAt: -1 });
 
     if (!sessions || sessions.length === 0) {
       return res.status(404).json({ success: false, message: 'No session history found' });
     }
 
+    // Format session data
     const formattedSessions = sessions.map(session => ({
       id: session._id,
       tab: session.tab,
@@ -53,7 +67,8 @@ router.get('/history', async (req, res) => {
 
     res.status(200).json({ success: true, sessions: formattedSessions });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error fetching session history:", error); // Log the error for debugging
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
   }
 });
 

@@ -7,25 +7,36 @@ import SettingsModal from "../components/SettingsModal";
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
 
-const Home = ({ userId,isDarkMode  }) => {
+const Home = ({ userId, isDarkMode }) => {
   const [tabsData, setTabsData] = useState([
     { label: "Focus-time", value: "focus-time", duration: 1500 }, // 25 minutes
     { label: "Short Break", value: "short-break", duration: 300 }, // 5 minutes
     { label: "Long Break", value: "long-break", duration: 900 }, // 15 minutes
   ]);
 
-  const [cycleCount, setCycleCount] = useState(0); // Tracks completed cycles
-  const [activeTabIndex, setActiveTabIndex] = useState(0); // Tracks the current tab (Focus, Break, Long Break)
-  const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration); // Tracks time left in the current session
-  const [isRunning, setIsRunning] = useState(false); // Tracks if the timer is running
-  const [resetSignal, setResetSignal] = useState(false); // Used to force a reset on the timer
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Tracks whether settings modal is open
+  const [cycleCount, setCycleCount] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(tabsData[0]?.duration);
+  const [isRunning, setIsRunning] = useState(false);
+  const [resetSignal, setResetSignal] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // New state variables for purpose and total time spent
+  const [purpose, setPurpose] = useState(""); // Purpose of use
+  const [totalFocusTime, setTotalFocusTime] = useState(0);
+  const [totalShortBreakTime, setTotalShortBreakTime] = useState(0);
+  const [totalLongBreakTime, setTotalLongBreakTime] = useState(0);
 
   useEffect(() => {
     if (Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
+
+  // Log userId to check if it's being passed correctly
+  useEffect(() => {
+    console.log("User  ID in Home component:", userId);
+  }, [userId]);
 
   const notify = (message) => {
     if (Notification.permission === "granted") {
@@ -46,15 +57,10 @@ const Home = ({ userId,isDarkMode  }) => {
 
   const handleNextSession = () => {
     setIsRunning(false);
-
     const nextIndex =
       activeTabIndex === 0
-        ? cycleCount < 3
-          ? 1
-          : 2
-        : activeTabIndex === 1
-        ? 0
-        : 1;
+        ? (cycleCount < 3 ? 1 : 2)
+        : (activeTabIndex === 1 ? 0 : 1);
 
     setActiveTabIndex(nextIndex);
     setTimeLeft(tabsData[nextIndex]?.duration || 0);
@@ -72,19 +78,29 @@ const Home = ({ userId,isDarkMode  }) => {
 
   const handleComplete = () => {
     const tab = tabsData[activeTabIndex];
-    const completionTime = new Date().toISOString();
+    const completionTime = new Date().toISOString(); 
+
+    // Update total time spent based on the active tab
+    if (activeTabIndex === 0) {
+      setTotalFocusTime((prev) => prev + tabsData[0].duration); // Add focus time
+    } else if (activeTabIndex === 1) {
+      setTotalShortBreakTime((prev) => prev + tabsData[1].duration); // Add short break time
+    } else if (activeTabIndex === 2) {
+      setTotalLongBreakTime((prev) => prev + tabsData[2].duration); // Add long break time
+    }
 
     const sessionData = {
-        userId: userId || "unknown",
-        tab: tab.value || "unknown",
-        completionTime: completionTime || new Date().toISOString(),
-        cycleCount: cycleCount + (activeTabIndex === 1 ? 1 : 0),
-        focusTime: tabsData[0]?.duration || 0,
-        shortBreak: tabsData[1]?.duration || 0,
-        longBreak: tabsData[2]?.duration || 0,
+      userId: userId, // Ensure userId is being passed correctly
+      tab:purpose, // Include purpose of use
+      focusTime: totalFocusTime + (activeTabIndex === 0 ? tabsData[0].duration : 0),
+      shortBreak: totalShortBreakTime + (activeTabIndex === 1 ? tabsData[1].duration : 0),
+      longBreak: totalLongBreakTime + (activeTabIndex === 2 ? tabsData[2].duration : 0),
+      cycleCount: cycleCount + (activeTabIndex === 1 ? 1 : 0),
+      completionTime: completionTime,
     };
 
-    saveSessionData(sessionData); // Data saved without toast
+    console.log("Session Data to be sent:", sessionData);
+    saveSessionData(sessionData); // Save session data
 
     notify(`Session "${tab.label}" completed!`);
 
@@ -92,10 +108,10 @@ const Home = ({ userId,isDarkMode  }) => {
     if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
       setCycleCount(0);
       toast.success("Pomodoro cycle completed! Refreshing...");
-      setTimeout(() => window.location.reload(), 5000); // Refresh after 2 seconds
+      setTimeout(() => window.location.reload(), 5000);
     } else if (activeTabIndex === 2) {
       toast.success("Pomodoro cycle completed! Refreshing...");
-      setTimeout(() => window.location.reload(), 5000); // Refresh after long break
+      setTimeout(() => window.location.reload(), 5000);
     } else {
       handleNextSession();
     }
@@ -110,8 +126,15 @@ const Home = ({ userId,isDarkMode  }) => {
         },
         body: JSON.stringify(sessionData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error saving session data:", errorData);
+        throw new Error("Failed to save session data");
+      }
+
       const result = await response.json();
-      
+      console.log("Session data saved successfully:", result);
     } catch (error) {
       console.error("Error saving session data:", error);
     }
@@ -195,11 +218,20 @@ const Home = ({ userId,isDarkMode  }) => {
         <TimeCircle
           duration={formatTime(timeLeft)}
           isRunning={isRunning}
-          resetSignal={resetSignal}
-        />
-
-        <div className=" ml-10 font-mono mt-4 text-xl">
+          resetSignal={resetSignal} />
+        
+        <div className="ml-10 font-mono mt-4 text-xl">
           <span>Completed Session {formatSessionProgress()}</span>
+        </div>
+
+        <div className="mt-4">
+          <input
+            type="text"
+            placeholder="Purpose of use (e.g., work, study)"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            className="border p-2 rounded"
+          />
         </div>
 
         <ControlButtons

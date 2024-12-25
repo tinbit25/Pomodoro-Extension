@@ -6,8 +6,15 @@ const StatusPage = () => {
 
   useEffect(() => {
     const fetchSessions = async () => {
+      const userId = localStorage.getItem("userId"); // Retrieve userId from local storage
+
+      if (!userId) {
+        setError("User  ID is not available. Please log in.");
+        return;
+      }
+
       try {
-        const response = await fetch("http://localhost:5000/api/sessions/history", {
+        const response = await fetch(`http://localhost:5000/api/sessions/history?userId=${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -41,6 +48,21 @@ const StatusPage = () => {
     return <div className="p-8">No session history available.</div>;
   }
 
+  // Calculate total time spent
+  const totalFocusTime = sessions.reduce((total, session) => total + session.focusTime, 0);
+  const totalShortBreakTime = sessions.reduce((total, session) => total + session.shortBreak, 0);
+  const totalLongBreakTime = sessions.reduce((total, session) => total + session.longBreak, 0);
+
+  // Helper function to format time
+  const formatTime = (timeInSeconds) => {
+    if (timeInSeconds < 60) {
+      return `${timeInSeconds} seconds`;
+    } else {
+      const minutes = Math.floor(timeInSeconds / 60);
+      return `${minutes} minutes`;
+    }
+  };
+
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold mb-4">Session History</h2>
@@ -50,9 +72,9 @@ const StatusPage = () => {
             <div>
               <strong>{session.tab}</strong>
             </div>
-            <div>Focus Time: {Math.round(session.focusTime / 60)} minutes</div>
-            <div>Short Break: {Math.round(session.shortBreak / 60)} minutes</div>
-            <div>Long Break: {Math.round(session.longBreak / 60)} minutes</div>
+            <div>Focus Time: {formatTime(session.focusTime)}</div>
+            <div>Short Break: {formatTime(session.shortBreak)}</div>
+            <div>Long Break: {formatTime(session.longBreak)}</div>
             <div>Cycles: {session.cycleCount}</div>
             <small className="text-gray-500">
               Completed at:{" "}
@@ -63,6 +85,12 @@ const StatusPage = () => {
           </li>
         ))}
       </ul>
+      <div className="mt-4">
+        <h3 className="text-lg font-bold">Total Time Spent</h3>
+        <div>Focus Time: {formatTime(totalFocusTime)}</div>
+        <div>Short Break: {formatTime(totalShortBreakTime)}</div>
+        <div>Long Break: {formatTime(totalLongBreakTime)}</div>
+      </div>
     </div>
   );
 };
