@@ -26,13 +26,13 @@ const TimeCircle = ({ duration, isRunning, resetSignal, isDarkMode }) => {
         width: circleSize,
         height: circleSize,
         border: "8px solid",
-        borderColor: isRunning ? "#0284c7" : "rgba(200, 200, 200, 0.5)", // Dynamic border color
+        borderColor: isRunning ? "#0284c7" : "rgba(200, 200, 200, 0.5)", 
         background: isRunning
           ? "radial-gradient(circle, rgba(2, 132, 199, 0.4) 0%, rgba(59, 130, 246, 0.1) 70%)"
-          : "radial-gradient(circle, rgba(209, 213, 219, 0.4) 0%, rgba(156, 163, 175, 0.1) 70%)", // Gradient background
+          : "radial-gradient(circle, rgba(209, 213, 219, 0.4) 0%, rgba(156, 163, 175, 0.1) 70%)", 
         boxShadow: isRunning
           ? "0 4px 20px rgba(2, 132, 199, 0.3)"
-          : "0 4px 20px rgba(156, 163, 175, 0.3)", // Dynamic shadow based on state
+          : "0 4px 20px rgba(156, 163, 175, 0.3)", 
       }}
     >
       <span

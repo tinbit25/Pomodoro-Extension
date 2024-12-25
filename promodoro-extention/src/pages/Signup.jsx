@@ -31,7 +31,7 @@ const Signup = ({ onSignupSuccess }) => {
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
-      console.error(err); // Log the error for further debugging
+      console.error(err); 
     } finally {
       setIsLoading(false);
     }

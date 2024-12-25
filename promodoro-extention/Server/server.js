@@ -26,10 +26,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sessions', sessionRoutes);
 
 if (process.env.NODE_ENV === 'production') {
-    // Set static folder to the build folder
+    
     app.use(express.static(path.join(__dirname, 'client/build')));
 
-    // Serve index.html for any route that is not handled by the API
+  
     app.get('*', (req, res) => {
         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
     });
@@ -44,6 +44,6 @@ app.use((err, req, res, next) => {
 // Start the server
 const port = process.env.PORT || 5000;
 app.listen(port, async () => {
-    await connectDB(); // Ensure DB is connected before accepting requests
+    await connectDB(); 
     console.log(`Server running on port ${port}`);
 });

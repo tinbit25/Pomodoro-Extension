@@ -78,8 +78,8 @@ const Home = ({ userId, isDarkMode }) => {
 
   const handleComplete = () => {
     const tab = tabsData[activeTabIndex];
-    const completionTime = new Date().toISOString(); 
-
+    const completionTime = new Date().toISOString();
+  
     // Update total time spent based on the active tab
     if (activeTabIndex === 0) {
       setTotalFocusTime((prev) => prev + tabsData[0].duration); // Add focus time
@@ -88,35 +88,35 @@ const Home = ({ userId, isDarkMode }) => {
     } else if (activeTabIndex === 2) {
       setTotalLongBreakTime((prev) => prev + tabsData[2].duration); // Add long break time
     }
-
+  
     const sessionData = {
-      userId: userId, // Ensure userId is being passed correctly
-      tab:purpose, // Include purpose of use
+      userId: userId,
+      tab: purpose || "General",
       focusTime: totalFocusTime + (activeTabIndex === 0 ? tabsData[0].duration : 0),
       shortBreak: totalShortBreakTime + (activeTabIndex === 1 ? tabsData[1].duration : 0),
       longBreak: totalLongBreakTime + (activeTabIndex === 2 ? tabsData[2].duration : 0),
       cycleCount: cycleCount + (activeTabIndex === 1 ? 1 : 0),
       completionTime: completionTime,
     };
-
+  
     console.log("Session Data to be sent:", sessionData);
     saveSessionData(sessionData); // Save session data
-
+  
     notify(`Session "${tab.label}" completed!`);
-
-    // Refresh page after a complete Pomodoro cycle or long break
-    if (activeTabIndex === tabsData.length - 1 && cycleCount === 3) {
+  
+    // Reset for a new Pomodoro cycle
+    if (activeTabIndex === 2 && cycleCount === 3) {
+      toast.success("Pomodoro cycle completed! Starting a new cycle...");
+      setActiveTabIndex(0); // Reset to focus time
+      setTimeLeft(tabsData[0]?.duration || 0);
       setCycleCount(0);
-      toast.success("Pomodoro cycle completed! Refreshing...");
-      setTimeout(() => window.location.reload(), 5000);
-    } else if (activeTabIndex === 2) {
-      toast.success("Pomodoro cycle completed! Refreshing...");
-      setTimeout(() => window.location.reload(), 5000);
+      setIsRunning(false);
+      setResetSignal((prev) => !prev);
     } else {
       handleNextSession();
     }
   };
-
+  
   const saveSessionData = async (sessionData) => {
     try {
       const response = await fetch("http://localhost:5000/api/sessions/saveSessionData", {
@@ -189,12 +189,24 @@ const Home = ({ userId, isDarkMode }) => {
   return (
     <div className=" ">
       <div
-        className={`w-full max-w-full p-8 rounded-lg ${
+        className={`w-full max-w-full px-8 pb-2 rounded-lg ${
           isDarkMode
             ? "bg-blue-950 text-white shadow-xl shadow-blue-900"
             : "bg-slate-200 text-black shadow-lg shadow-gray-400"
         } relative`}
       >
+<div className="flex space-x-16">
+<div className="mt-4 ">
+          <input
+            type="text"
+            placeholder="Purpose of use (e.g., work, study)"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            className={` ${isDarkMode
+            ? "bg-blue-950 text-white shadow-xl"
+            : "bg-slate-200 text-black shadow-lg"} border p-2 rounded mb-5`}
+          />
+        </div>
         <div className="flex justify-end">
           <button
             className="text-2xl p-2 rounded-full"
@@ -202,6 +214,7 @@ const Home = ({ userId, isDarkMode }) => {
           >
             <FaCog />
           </button>
+        </div>
         </div>
 
         <div className="flex space-x-6 mb-8 justify-center">
@@ -224,15 +237,7 @@ const Home = ({ userId, isDarkMode }) => {
           <span>Completed Session {formatSessionProgress()}</span>
         </div>
 
-        <div className="mt-4">
-          <input
-            type="text"
-            placeholder="Purpose of use (e.g., work, study)"
-            value={purpose}
-            onChange={(e) => setPurpose(e.target.value)}
-            className="border p-2 rounded"
-          />
-        </div>
+        
 
         <ControlButtons
           isRunning={isRunning}

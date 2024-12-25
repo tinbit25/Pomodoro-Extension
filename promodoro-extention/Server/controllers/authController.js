@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const bcryptjs = require('bcryptjs');
 const User = require('../models/userModel');
-const { generateTokenAndSetCookie, sendWelcomeEmail, sendPasswordResetEmail,sendResetSuccessEmail } = require('../mailtrap/emails');
+const { sendWelcomeEmail, sendPasswordResetEmail,sendResetSuccessEmail } = require('../mailtrap/emails');
 
 
 
@@ -43,8 +43,7 @@ exports.signup = async (req, res) => {
     }
 };
 
-// Login function (no token)
-// Login function (no token)
+
 exports.login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -58,7 +57,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
 
-        // Check if the account is verified
+       
         if (!user.isVerified) {
             return res.status(403).json({ success: false, message: 'User  account is not verified' });
         }
@@ -68,13 +67,13 @@ exports.login = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
 
-        // If everything is okay, return success
+       
         res.status(200).json({
             success: true,
             message: "Logged in successfully",
             user: { 
                 ...user._doc, 
-                password: undefined, // Exclude password from response
+                password: undefined, 
             },
         });
     } catch (error) {
@@ -85,7 +84,7 @@ exports.login = async (req, res) => {
 // Logout function (no token-based auth)
 exports.logout = async (req, res) => {
     try {
-        // Here, you can log out the user by clearing cookies or session (if you're using session-based auth)
+      
         res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
@@ -172,39 +171,3 @@ exports.forgotPassword=async(req,res)=>{
        });
      }
    };
-// Update Pomodoro status after a completed cycle
-exports.updatePomodoroStatus = async (user, completionTime, focusTime, shortBreak, longBreak) => {
-    try {
-        user.pomodoroStatus.cycleCount += 1;
-        user.pomodoroStatus.completionTime += completionTime;
-        user.pomodoroStatus.focusTime += focusTime;
-        user.pomodoroStatus.shortBreak += shortBreak;
-        user.pomodoroStatus.longBreak += longBreak;
-        user.pomodoroStatus.status = 'active';
-
-        await user.save();
-    } catch (error) {
-        console.error("Error updating Pomodoro status:", error);
-    }
-};
-
-// Complete Pomodoro cycle function
-exports.completePomodoroCycle = async (req, res) => {
-    const { userId, completionTime, focusTime, shortBreak, longBreak } = req.body;
-
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(400).json({ success: false, message: 'User not found' });
-        }
-
-        await exports.updatePomodoroStatus(user, completionTime, focusTime, shortBreak, longBreak);
-
-        res.status(200).json({
-            success: true,
-            message: 'Pomodoro cycle completed and status updated'
-        });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-};

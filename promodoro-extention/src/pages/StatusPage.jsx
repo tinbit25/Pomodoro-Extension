@@ -6,7 +6,7 @@ const StatusPage = () => {
 
   useEffect(() => {
     const fetchSessions = async () => {
-      const userId = localStorage.getItem("userId"); // Retrieve userId from local storage
+      const userId = localStorage.getItem("userId");
 
       if (!userId) {
         setError("User  ID is not available. Please log in.");
@@ -25,9 +25,9 @@ const StatusPage = () => {
           throw new Error(`Failed to fetch sessions: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json(); 
         if (data.success) {
-          setSessions(data.sessions); // Ensure you're setting the correct property from the response
+          setSessions(data.sessions); 
         } else {
           throw new Error(data.message || "Failed to fetch session history");
         }
@@ -48,12 +48,25 @@ const StatusPage = () => {
     return <div className="p-8">No session history available.</div>;
   }
 
-  // Calculate total time spent
+  // Group sessions by purpose
+  const groupedSessions = sessions.reduce((acc, session) => {
+    const purpose = session.tab; 
+    if (!acc[purpose]) {
+      acc[purpose] = [];
+    }
+    acc[purpose].push(session);
+    return acc;
+  }, {});
+
+  
+  const lastSession = sessions[sessions.length - 1];
+
+  
   const totalFocusTime = sessions.reduce((total, session) => total + session.focusTime, 0);
   const totalShortBreakTime = sessions.reduce((total, session) => total + session.shortBreak, 0);
   const totalLongBreakTime = sessions.reduce((total, session) => total + session.longBreak, 0);
 
-  // Helper function to format time
+ 
   const formatTime = (timeInSeconds) => {
     if (timeInSeconds < 60) {
       return `${timeInSeconds} seconds`;
@@ -65,31 +78,48 @@ const StatusPage = () => {
 
   return (
     <div className="p-8">
-      <h2 className="text-2xl font-bold mb-4">Session History</h2>
-      <ul>
-        {sessions.map((session) => (
-          <li key={session.id} className="mb-4 border-b pb-4">
-            <div>
-              <strong>{session.tab}</strong>
-            </div>
-            <div>Focus Time: {formatTime(session.focusTime)}</div>
-            <div>Short Break: {formatTime(session.shortBreak)}</div>
-            <div>Long Break: {formatTime(session.longBreak)}</div>
-            <div>Cycles: {session.cycleCount}</div>
-            <small className="text-gray-500">
-              Completed at:{" "}
-              {session.completionTime
-                ? new Date(session.completionTime).toLocaleString()
-                : "N/A"}
-            </small>
-          </li>
+      <h2 className="text-2xl font-bold mb-4">
+        {lastSession && lastSession.tab === "long-break" && lastSession.cycleCount === 3
+          ? "Pomodoro Cycle Completed!"
+          : "Pomodoro Cycle Failed!"}
+      </h2>
+      <div className="mb-4">
+        {lastSession && (
+          <p>
+            Last completed session: <strong>{lastSession.tab}</strong> at {new Date(lastSession.completionTime).toLocaleString()}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols -3 gap-4">
+        <div className="bg-green-100 p-4 rounded shadow">
+          <h3 className="text-lg font-bold">Total Focus Time</h3>
+          <p>{formatTime(totalFocusTime)}</p>
+        </div>
+        <div className="bg-yellow-100 p-4 rounded shadow">
+          <h3 className="text-lg font-bold">Total Short Break</h3>
+          <p>{formatTime(totalShortBreakTime)}</p>
+        </div>
+        <div className="bg-blue-100 p-4 rounded shadow">
+          <h3 className="text-lg font-bold">Total Long Break</h3>
+          <p>{formatTime(totalLongBreakTime)}</p>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="text-lg font-bold">Session History</h3>
+        {Object.keys(groupedSessions).map((purpose) => (
+          <div key={purpose} className="mb-4">
+            <h4 className="font-semibold">{purpose}</h4>
+            <ul className="list-disc pl-5">
+              {groupedSessions[purpose].map((session) => (
+                <li key={session.id}>
+                  <strong>{session.tab}</strong> - Completed at: {new Date(session.completionTime).toLocaleString()}
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </ul>
-      <div className="mt-4">
-        <h3 className="text-lg font-bold">Total Time Spent</h3>
-        <div>Focus Time: {formatTime(totalFocusTime)}</div>
-        <div>Short Break: {formatTime(totalShortBreakTime)}</div>
-        <div>Long Break: {formatTime(totalLongBreakTime)}</div>
       </div>
     </div>
   );

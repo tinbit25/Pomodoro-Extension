@@ -1,9 +1,8 @@
 
-// Save session data (without token-based auth)
 const express = require('express');
 const Session = require('../models/Session');
 const User = require('../models/userModel');
-const mongoose = require('mongoose'); // Import mongoose to use ObjectId
+const mongoose = require('mongoose'); 
 const router = express.Router();
 
 // Save session data
@@ -15,7 +14,7 @@ router.post('/saveSessionData', async (req, res) => {
   }
 
   try {
-    // Convert userId to ObjectId
+    
     const userObjectId = new mongoose.Types.ObjectId(userId); // Use new keyword
 
     // Validate userId exists
@@ -44,10 +43,10 @@ router.get('/history', async (req, res) => {
   }
 
   try {
-    // Convert userId to ObjectId using 'new'
+    
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    // Retrieve session history
+    
     const sessions = await Session.find({ userId: userObjectId }).sort({ createdAt: -1 });
 
     if (!sessions || sessions.length === 0) {

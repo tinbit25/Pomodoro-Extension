@@ -16,46 +16,46 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Toggle theme (dark mode)
+
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
-  // Check login status and user ID when the app loads
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true); // Set user as logged in if token exists
+      setIsLoggedIn(true); 
     }
 
-    const storedUserId = localStorage.getItem("userId"); // Retrieve userId from local storage
-    console.log("User  ID from local storage:", storedUserId); // Log the userId
-    setUserId(storedUserId); // Set the userId state
+    const storedUserId = localStorage.getItem("userId"); 
+    console.log("User  ID from local storage:", storedUserId); 
+    setUserId(storedUserId); 
   }, []);
 
   // Handle login success and redirect
   const handleLoginSuccess = (userData) => {
     setIsLoggedIn(true);
-    localStorage.setItem("userId", userData._id); // Store userId in local storage
-    setUserId(userData._id); // Update userId state immediately
-    navigate("/"); // Redirect to home page after login
+    localStorage.setItem("userId", userData._id); 
+    setUserId(userData._id); 
+    navigate("/");
   };
 
   // Handle signup success and redirect
   const handleSignupSuccess = () => {
-    navigate("/login"); // Redirect to login page after signup
+    navigate("/login"); 
   };
 
   // Handle logout
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("token"); // Remove token from local storage
-    localStorage.removeItem("userId"); // Remove userId from local storage
-    setUserId(null); // Reset userId state
-    navigate("/login"); // Redirect to login page after logout
+    localStorage.removeItem("token"); 
+    localStorage.removeItem("userId");
+    setUserId(null); 
+    navigate("/login"); 
   };
 
   // Handle session complete (update session data)
   const handleSessionComplete = (sessionDetails) => {
-    setSessionData(sessionDetails); // Set session data here
+    setSessionData(sessionDetails);
     console.log("Session Completed: ", sessionDetails);
   };
 
@@ -82,7 +82,7 @@ const App = () => {
               <Home
                 isDarkMode={isDarkMode}
                 handleSessionComplete={handleSessionComplete}
-                userId={userId} // Pass userId to Home
+                userId={userId} 
               />
             }
           />
@@ -94,7 +94,7 @@ const App = () => {
             path="/login"
             element={<Login onLoginSuccess={handleLoginSuccess} />}
           />
-          <Route path="/forgot-password " element={<ForgotPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/status" element={<Status sessionData={sessionData} />} />

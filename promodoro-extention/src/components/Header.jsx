@@ -10,17 +10,17 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
     try {
       const response = await fetch("http://localhost:5000/api/auth/logout", {
         method: "POST",
-        credentials: "include", // Include credentials (cookies)
+        credentials: "include", 
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log(data.message); // Logged out successfully
-        // Redirect to the login page or home page
+        console.log(data.message); 
+        
         navigate("/login");
       } else {
-        console.error(data.message); // Handle error response
+        console.error(data.message); 
       }
     } catch (error) {
       console.error("An error occurred during logout:", error);
@@ -28,16 +28,16 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
   };
 
   const handleProfileMenuItemClick = (item) => {
-    setShowProfileMenu(false); // Close the profile menu after selection
+    setShowProfileMenu(false); 
 
-    // Navigate to the corresponding page based on the menu item
+    
     if (item === "Logout") {
       handleLogout();
       navigate("/login");
     } else if (item === "Profile") {
-      navigate("/profile"); // Navigate to the Profile page
+      navigate("/profile"); 
     } else if (item === "Status") {
-      navigate("/status"); // Navigate to the Status page, changed to /route
+      navigate("/status"); 
     }
   };
 
@@ -66,7 +66,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
               aria-label="Open Profile Menu"
             >
               <img
-                src={userProfile?.avatar || "https://i.pravatar.cc/300"} // User avatar or placeholder
+                src={userProfile?.avatar || "https://i.pravatar.cc/300"} 
                 alt="User Profile"
                 className="w-full h-full object-cover"
               />
@@ -90,7 +90,7 @@ const Header = ({ isDarkMode, toggleTheme, isLoggedIn, onLogout, userProfile }) 
         ) : (
           <button
             className="px-3 py-1 bg-green-500 text-white rounded"
-            onClick={() => navigate("/login")} // Navigate to the login page if not logged in
+            onClick={() => navigate("/login")} 
           >
             Login
           </button>

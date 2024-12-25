@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react'; // Assuming you're using lucide-react for icons
+import { Eye, EyeOff } from 'lucide-react'; 
 
 const Input = ({ icon: Icon, label, type, onToggleVisibility, ...props }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(type === 'password' ? false : true);
@@ -34,9 +34,9 @@ const Input = ({ icon: Icon, label, type, onToggleVisibility, ...props }) => {
           onClick={handleToggleVisibility}
         >
           {isPasswordVisible ? (
-            <EyeOff className="w-5 h-5 text-gray-400" />
+            <EyeOff className="w-5 h-5 py-2 text-gray-400" />
           ) : (
-            <Eye className="w-5 h-5 text-gray-400" />
+            <Eye className="w-5 h-5 py-2 text-gray-400" />
           )}
         </button>
       )}

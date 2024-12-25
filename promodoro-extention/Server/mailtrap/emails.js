@@ -2,7 +2,7 @@ const { sender, sgMail } = require('./mailtra.config');
 const { PASSWORD_RESET_SUCCESS_TEMPLATE,PASSWORD_RESET_REQUEST_TEMPLATE } = require("./emailTemplates");
 
 
-const sendWelcomeEmail = async (email, name) => {
+const sendWelcomeEmail = async (email,name) => {
   try {
     console.log("Sending welcome email to:", email);
 

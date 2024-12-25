@@ -31,33 +31,7 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpiredAt: Date,
     verificationToken: String,
     verificationTokenExpiredAt: Date,
-    pomodoroStatus: {
-        cycleCount: {
-            type: Number,
-            default: 0
-        },
-        completionTime: {
-            type: Number,
-            default: 0
-        },
-        focusTime: {
-            type: Number,
-            default: 0
-        },
-        shortBreak: {
-            type: Number,
-            default: 0
-        },
-        longBreak: {
-            type: Number,
-            default: 0
-        },
-        status: {
-            type: String,
-            enum: ['active', 'completed', 'paused'],
-            default: 'active'
-        }
-    }
+    
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
